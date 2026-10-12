@@ -1,0 +1,522 @@
+/* Landing — role selection page with split hero */
+
+.landing {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+.landing__topbar {
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.landing__topbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: var(--header-h);
+}
+
+.landing__topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.landing__main {
+  flex: 1;
+}
+
+/* Hero — split layout */
+
+.landing__hero {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+  padding: 48px 20px 40px;
+}
+
+.landing__hero-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.landing__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+  color: var(--primary);
+  background: var(--primary-soft);
+  padding: 7px 14px;
+  border-radius: 999px;
+  margin-bottom: 20px;
+}
+
+.landing__hero h1 {
+  font-size: 33px;
+  line-height: 1.12;
+  letter-spacing: -1px;
+  font-weight: 800;
+  color: var(--text-strong);
+  margin-bottom: 16px;
+  max-width: 560px;
+}
+
+.landing__hero p {
+  font-size: 16.5px;
+  color: var(--text-muted);
+  max-width: 560px;
+  margin-bottom: 28px;
+}
+
+.landing__hero-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: stretch;
+  width: 100%;
+  max-width: 480px;
+}
+
+.landing__hero-visual {
+  display: grid;
+  place-items: center;
+}
+
+/* Transit map graphic card */
+
+.map-card {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.map-card__badge {
+  position: absolute;
+  top: -12px;
+  left: 22px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--primary);
+  color: #ffffff;
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 7px 13px;
+  border-radius: 999px;
+  box-shadow: var(--shadow-sm);
+}
+
+.map-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4ade80;
+}
+
+.map-card__live {
+  position: absolute;
+  top: -12px;
+  right: 22px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  padding: 6px 11px;
+  border-radius: 999px;
+  box-shadow: var(--shadow-sm);
+}
+
+.map-dot--live {
+  background: var(--accent);
+  animation: map-blink 1.6s ease-in-out infinite;
+}
+
+@keyframes map-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.map-svg {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  display: block;
+}
+
+.map-route {
+  stroke: var(--accent-strong);
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-dasharray: 1 11;
+}
+
+.map-pulse {
+  transform-origin: 163px 62px;
+  animation: map-pulse 2s ease-out infinite;
+}
+
+@keyframes map-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  70% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+.map-bike {
+  animation: bike-bob 2.8s ease-in-out infinite;
+}
+
+@keyframes bike-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+.map-card__rider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+}
+
+.map-card__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  font-size: 12.5px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.map-card__avatar--brand {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.map-card__rider-meta {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+
+.map-card__rider-meta strong {
+  font-size: 13.5px;
+  color: var(--text-strong);
+}
+
+.map-card__rider-meta small {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.map-card__gps {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--primary);
+  background: var(--primary-soft);
+  border: 1px solid var(--primary-soft-strong);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+}
+
+/* Features */
+
+.landing__features {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  padding-block: 16px 48px;
+}
+
+.feature {
+  padding: 24px;
+  text-align: left;
+}
+
+.feature__icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  display: grid;
+  place-items: center;
+  margin-bottom: 14px;
+}
+
+.feature h3 {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-strong);
+  margin-bottom: 6px;
+}
+
+.feature p {
+  font-size: 14.5px;
+  color: var(--text-muted);
+}
+
+/* Roles */
+
+.landing__roles {
+  padding-bottom: 64px;
+}
+
+.landing__roles-head {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.landing__roles-head h2 {
+  font-size: 25px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--text-strong);
+  margin-bottom: 8px;
+}
+
+.landing__roles-head p {
+  font-size: 15px;
+  color: var(--text-muted);
+}
+
+.role-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+.role-card {
+  display: flex;
+  flex-direction: column;
+  padding: 28px 24px;
+  text-align: left;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.role-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary-soft-strong);
+}
+
+.role-card__icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 16px;
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.role-card--rider .role-card__icon {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
+.role-card h3 {
+  font-size: 21px;
+  font-weight: 800;
+  color: var(--text-strong);
+  letter-spacing: -0.3px;
+  margin-bottom: 6px;
+}
+
+.role-card > p {
+  color: var(--text-muted);
+  font-size: 15px;
+  margin-bottom: 18px;
+}
+
+.role-card ul {
+  list-style: none;
+  margin: 0 0 24px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  flex: 1;
+}
+
+.role-card li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 14.5px;
+  color: var(--text);
+  line-height: 1.45;
+}
+
+.role-card li svg {
+  color: var(--accent-strong);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* Footer */
+
+.landing__footer {
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.landing__footer-inner {
+  padding-block: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 26px;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.footer-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.footer-item svg {
+  color: var(--accent-strong);
+}
+
+/* Tablet & desktop */
+@media screen and (min-width: 768px) {
+  .landing__hero {
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 48px;
+    align-items: center;
+    padding: 72px 20px 64px;
+  }
+
+  .landing__hero h1 {
+    font-size: 46px;
+  }
+
+  .landing__hero p {
+    font-size: 17.5px;
+  }
+
+  .landing__hero-actions {
+    flex-direction: row;
+    max-width: none;
+  }
+
+  .landing__features {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    padding-block: 16px 72px;
+  }
+
+  .role-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .role-card {
+    padding: 32px;
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  .role-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Phone refinements */
+@media screen and (max-width: 480px) {
+  .landing__hero {
+    padding: 36px 16px 32px;
+    gap: 26px;
+  }
+
+  .landing__hero h1 {
+    font-size: 28px;
+  }
+
+  .landing__hero p {
+    font-size: 15px;
+  }
+
+  .landing__hero-actions .btn {
+    width: 100%;
+  }
+
+  .map-card {
+    max-width: 340px;
+  }
+
+  .role-card {
+    padding: 22px 18px;
+  }
+
+  .brand-wordmark em {
+    display: none;
+  }
+}
+
+/* Tablet/container refinements */
+@media screen and (max-width: 1140px) {
+  .landing__features {
+    gap: 14px;
+  }
+}

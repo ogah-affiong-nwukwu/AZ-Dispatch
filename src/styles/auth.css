@@ -1,0 +1,171 @@
+/* Authentication — login view */
+
+.auth {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+.auth__topbar {
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.auth__topbar-inner {
+  display: flex;
+  align-items: center;
+  height: var(--header-h);
+}
+
+.auth__main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px 56px;
+}
+
+.auth__card {
+  width: 100%;
+  max-width: 470px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 30px 22px;
+}
+
+.auth__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 0;
+  margin-bottom: 18px;
+  transition: color 0.15s ease;
+}
+
+.auth__back:hover {
+  color: var(--primary);
+}
+
+.auth__head {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.auth__logo {
+  width: 46px;
+  height: 46px;
+  border-radius: 13px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  display: grid;
+  place-items: center;
+  margin: 0 auto 14px;
+}
+
+.auth__head h1 {
+  font-size: 23px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  color: var(--text-strong);
+  margin-bottom: 6px;
+}
+
+.auth__head p {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+/* Role tabs */
+
+.role-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  background: var(--surface-2);
+  padding: 5px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.role-tabs__btn {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 8px;
+  border-radius: 9px;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.role-tabs__btn--active {
+  background: var(--surface);
+  color: var(--primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.auth__switch {
+  display: block;
+  width: 100%;
+  text-align: center;
+  margin-top: 18px;
+  background: none;
+  border: none;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--primary);
+  cursor: pointer;
+  padding: 4px;
+}
+
+.auth__switch:hover {
+  text-decoration: underline;
+}
+
+/* Tablet & desktop */
+@media screen and (min-width: 768px) {
+  .auth__card {
+    padding: 40px;
+  }
+}
+
+/* Phone refinements */
+@media screen and (max-width: 480px) {
+  .auth__main {
+    padding: 20px 16px 40px;
+  }
+
+  .auth__card {
+    padding: 24px 18px;
+  }
+
+  .auth__head h1 {
+    font-size: 21px;
+  }
+
+  .brand-wordmark em {
+    display: none;
+  }
+}
+
+/* Tablet/container refinements */
+@media screen and (max-width: 1140px) {
+  .auth__card {
+    max-width: 440px;
+  }
+}

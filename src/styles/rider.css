@@ -1,0 +1,79 @@
+/* Rider portal — clock-in & availability */
+
+.clockin-card {
+  padding: 22px;
+}
+
+.availability-panel {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  background: var(--success-soft);
+  border: 1px solid color-mix(in srgb, var(--success) 40%, transparent);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+}
+
+.availability-panel__icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 13px;
+  background: var(--success);
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.availability-panel__meta {
+  flex: 1;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.availability-panel__meta strong {
+  font-size: 15.5px;
+  color: var(--text-strong);
+}
+
+.availability-panel__meta span {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.availability-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+/* Tablet & desktop */
+@media screen and (min-width: 768px) {
+  .clockin-card {
+    padding: 26px;
+  }
+}
+
+/* Phone refinements */
+@media screen and (max-width: 480px) {
+  .clockin-card {
+    padding: 18px;
+  }
+
+  .availability-panel {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 16px;
+  }
+}
+
+/* Tablet/container refinements */
+@media screen and (max-width: 1140px) {
+  .clockin-card {
+    padding: 20px;
+  }
+}

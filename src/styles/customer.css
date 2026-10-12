@@ -1,0 +1,385 @@
+/* Customer dashboard — order form, deliveries, tracking, addresses */
+
+.order-form-card {
+  padding: 20px;
+  margin-bottom: 36px;
+}
+
+.field--full {
+  grid-column: 1 / -1;
+}
+
+.delivery-card__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13.5px;
+  color: var(--text);
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+
+.delivery-card__item svg {
+  color: var(--accent-strong);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.meta-item--pending {
+  color: var(--warning);
+  font-weight: 600;
+}
+
+.meta-item--pending svg {
+  color: var(--warning);
+}
+
+.delivery-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.delivery-card {
+  overflow: hidden;
+}
+
+.delivery-card__body {
+  padding: 20px;
+}
+
+.delivery-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.delivery-card__head-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.delivery-card__id {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.delivery-card__id strong {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text-strong);
+  letter-spacing: -0.2px;
+}
+
+.delivery-card__id span {
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+/* Route stops */
+
+.route {
+  display: flex;
+  align-items: stretch;
+  margin-bottom: 14px;
+}
+
+.route__stop {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  padding: 12px 14px;
+  background: var(--surface-2);
+  border-radius: 10px;
+}
+
+.route__stop small {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-muted);
+}
+
+.route__stop strong {
+  font-size: 13.5px;
+  color: var(--text-strong);
+}
+
+.route__stop span {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.route__arrow {
+  display: grid;
+  place-items: center;
+  padding: 0 8px;
+  color: var(--accent-strong);
+  flex-shrink: 0;
+}
+
+/* Meta */
+
+.delivery-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+  font-size: 13.5px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.meta-item svg {
+  color: var(--accent-strong);
+  flex-shrink: 0;
+}
+
+.meta-item--delivered {
+  color: var(--success);
+  font-weight: 600;
+}
+
+.meta-item--delivered svg {
+  color: var(--success);
+}
+
+.delivery-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* Previous orders menu */
+
+.history-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary);
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.history-toggle:hover {
+  background: var(--primary-soft);
+  border-color: var(--primary-soft-strong);
+}
+
+/* Timeline */
+
+.timeline-toggle {
+  border: none;
+  border-top: 1px solid var(--border);
+  width: 100%;
+  background: none;
+  padding: 14px 20px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.timeline-toggle:hover {
+  background: var(--primary-soft);
+}
+
+.timeline {
+  padding: 6px 20px 20px;
+}
+
+.timeline__item {
+  position: relative;
+  padding-left: 26px;
+  padding-bottom: 18px;
+}
+
+.timeline__item::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 22px;
+  bottom: 0;
+  width: 2px;
+  background: var(--border);
+}
+
+.timeline__item:last-child::before {
+  display: none;
+}
+
+.timeline__dot {
+  position: absolute;
+  left: 0;
+  top: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 2px solid var(--border-strong);
+}
+
+.timeline__item--success .timeline__dot {
+  background: var(--success);
+  border-color: var(--success);
+}
+
+.timeline__item--info .timeline__dot {
+  background: var(--info);
+  border-color: var(--info);
+}
+
+.timeline__item--warning .timeline__dot {
+  background: var(--warning);
+  border-color: var(--warning);
+}
+
+.timeline__title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-strong);
+}
+
+.timeline__time {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.timeline__desc {
+  font-size: 13.5px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* Drop-off form */
+
+.dropoff-form {
+  border-top: 1px solid var(--border);
+  padding: 20px;
+  background: var(--surface-2);
+}
+
+/* Default address */
+
+.address-card {
+  padding: 22px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.address-card__icon {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  display: grid;
+  place-items: center;
+}
+
+.address-card__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.address-card__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.address-card__head h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-strong);
+}
+
+.address-card__body p {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+/* Tablet & desktop */
+@media screen and (min-width: 768px) {
+  .form-grid--2 {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .address-card {
+    padding: 24px;
+  }
+
+  .order-form-card {
+    padding: 24px;
+  }
+}
+
+/* Phone refinements */
+@media screen and (max-width: 480px) {
+  .delivery-card__body {
+    padding: 16px;
+  }
+
+  .route__stop span {
+    display: none;
+  }
+
+  .route__arrow {
+    padding: 0 5px;
+  }
+
+  .timeline {
+    padding-inline: 16px;
+  }
+
+  .dropoff-form {
+    padding: 16px;
+  }
+}
+
+/* Tablet/container refinements */
+@media screen and (max-width: 1140px) {
+  .delivery-card__meta {
+    gap: 10px 16px;
+  }
+}

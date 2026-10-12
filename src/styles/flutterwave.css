@@ -1,0 +1,320 @@
+/* Flutterwave simulated payment modal */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(2, 20, 12, 0.62);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  animation: flw-fade-in 0.18s ease-out;
+}
+
+@keyframes flw-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-card {
+  width: min(480px, 100%);
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  max-height: 90svh;
+  overflow-y: auto;
+  animation: flw-modal-in 0.22s ease-out;
+}
+
+@keyframes flw-modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.modal-card__head {
+  background: var(--primary-strong);
+  color: #ffffff;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.flw-mark {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: #f5a623;
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  font-size: 12.5px;
+  font-family: 'Consolas', 'Menlo', monospace;
+  flex-shrink: 0;
+}
+
+.modal-card__head strong {
+  flex: 1;
+  font-size: 14.5px;
+}
+
+.test-chip {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.7px;
+  background: #f5a623;
+  color: #221503;
+  padding: 4px 9px;
+  border-radius: 999px;
+}
+
+.modal-close {
+  background: rgba(255, 255, 255, 0.14);
+  border: none;
+  color: #ffffff;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 0.15s ease;
+}
+
+.modal-close:hover {
+  background: rgba(255, 255, 255, 0.26);
+}
+
+.modal-card__body {
+  padding: 24px 20px;
+}
+
+/* Review step */
+
+.pay-merchant {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.pay-merchant__logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.pay-merchant strong {
+  display: block;
+  font-size: 14.5px;
+  color: var(--text-strong);
+}
+
+.pay-merchant span {
+  display: block;
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+.pay-amount {
+  text-align: center;
+  padding: 18px;
+  background: var(--surface-2);
+  border-radius: var(--radius-md);
+  margin-bottom: 18px;
+}
+
+.pay-amount small {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.pay-amount strong {
+  display: block;
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--text-strong);
+  letter-spacing: -1px;
+  margin-top: 4px;
+}
+
+.pay-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.pay-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13.5px;
+}
+
+.pay-row span:first-child {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.pay-row span:last-child {
+  color: var(--text-strong);
+  font-weight: 600;
+  text-align: right;
+}
+
+.pay-note {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.pay-note svg {
+  color: var(--info);
+  flex-shrink: 0;
+}
+
+.modal-card__actions {
+  display: flex;
+  gap: 10px;
+}
+
+.modal-card__actions .btn {
+  flex: 1;
+}
+
+/* Processing step */
+
+.pay-processing {
+  text-align: center;
+  padding: 30px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.pay-processing strong {
+  color: var(--text-strong);
+  font-size: 16px;
+}
+
+.pay-processing p {
+  color: var(--text-muted);
+  font-size: 14px;
+  max-width: 320px;
+}
+
+/* Success step */
+
+.pay-success {
+  text-align: center;
+  padding: 26px 10px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.pay-success__check {
+  color: var(--success);
+  animation: flw-check-pop 0.35s ease-out;
+}
+
+@keyframes flw-check-pop {
+  from {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.pay-success h3 {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-strong);
+  letter-spacing: -0.3px;
+}
+
+.pay-success p {
+  font-size: 13.5px;
+  color: var(--text-muted);
+  max-width: 330px;
+}
+
+.pay-ref {
+  font-family: 'Consolas', 'Menlo', 'Courier New', monospace;
+  font-size: 12.5px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  padding: 7px 13px;
+  border-radius: 8px;
+  color: var(--text-muted);
+}
+
+.pay-success .btn {
+  margin-top: 10px;
+  min-width: 220px;
+}
+
+/* Tablet & desktop */
+@media screen and (min-width: 768px) {
+  .modal-card__body {
+    padding: 28px 26px;
+  }
+}
+
+/* Phone refinements */
+@media screen and (max-width: 480px) {
+  .modal-backdrop {
+    padding: 14px;
+    align-items: end;
+  }
+
+  .modal-card {
+    max-height: 88svh;
+    border-radius: var(--radius-lg) var(--radius-lg) 14px 14px;
+  }
+
+  .modal-card__actions {
+    flex-direction: column-reverse;
+  }
+
+  .pay-amount strong {
+    font-size: 26px;
+  }
+}
+
+/* Tablet/container refinements */
+@media screen and (max-width: 1140px) {
+  .modal-card {
+    width: min(460px, 100%);
+  }
+}

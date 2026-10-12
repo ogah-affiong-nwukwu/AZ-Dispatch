@@ -1,0 +1,517 @@
+/* Dispatcher dashboard — review panel, waybills, PoD engine, boosts */
+
+/* Business review & assignment */
+
+.review-card {
+  overflow: hidden;
+}
+
+.review-card__body {
+  padding: 20px;
+}
+
+.assign-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  background: var(--accent-soft);
+  border: 1px solid var(--primary-soft-strong);
+  border-radius: var(--radius-md);
+  padding: 12px;
+}
+
+.assign-row .input--select {
+  flex: 1;
+  min-width: 220px;
+}
+
+.pipeline-card {
+  overflow: hidden;
+}
+
+.pipeline-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  padding: 14px 18px;
+  align-items: center;
+}
+
+.pipeline-row + .pipeline-row {
+  border-top: 1px solid var(--border);
+}
+
+.pipeline-row__id {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.pipeline-row__id strong {
+  font-size: 14px;
+  color: var(--text-strong);
+}
+
+.pipeline-row__id small {
+  font-size: 12px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pipeline-row__item {
+  font-size: 13px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pipeline-row__amount {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-strong);
+  white-space: nowrap;
+}
+
+.pipeline-row__rider {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.waybill-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.waybill-card {
+  overflow: hidden;
+}
+
+.waybill-card__body {
+  padding: 20px;
+}
+
+/* Proof-of-delivery engine */
+
+.pod-panel {
+  border-top: 1px solid var(--border);
+  background: var(--surface-2);
+  padding: 20px;
+}
+
+.pod-steps {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.pod-step {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pod-step--done {
+  border-color: color-mix(in srgb, var(--success) 45%, transparent);
+  background: var(--success-soft);
+}
+
+.pod-step__head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-strong);
+}
+
+.step-num {
+  width: 23px;
+  height: 23px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 1.5px solid var(--border-strong);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.pod-step--done .step-num {
+  background: var(--success);
+  border-color: var(--success);
+  color: #ffffff;
+}
+
+.pod-step p {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* GPS reading */
+
+.gps-reading {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text-strong);
+  line-height: 1;
+}
+
+.gps-reading small {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.gps-threshold {
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+.gps-meter {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.gps-meter__fill {
+  display: block;
+  height: 100%;
+  background: var(--success);
+  border-radius: 999px;
+  transition: width 0.45s ease;
+}
+
+.gps-meter__fill--fail {
+  background: var(--danger);
+}
+
+/* OTP */
+
+.otp-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.otp-input {
+  font-family: 'Consolas', 'Menlo', 'Courier New', monospace;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 10px;
+  text-align: center;
+  padding: 10px;
+}
+
+.otp-error {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--danger);
+}
+
+.sim-sms {
+  background: var(--surface);
+  border: 1.5px dashed var(--primary-soft-strong);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+.sim-sms strong {
+  display: block;
+  color: var(--text-strong);
+  margin-bottom: 4px;
+  font-size: 13.5px;
+}
+
+.sim-sms__code {
+  font-family: 'Consolas', 'Menlo', 'Courier New', monospace;
+  font-weight: 800;
+  letter-spacing: 3px;
+  color: var(--primary);
+  font-size: 17px;
+}
+
+.pod-confirm {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+}
+
+.pod-confirm__hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  max-width: 380px;
+}
+
+.pod-confirm__hint svg {
+  color: var(--info);
+  flex-shrink: 0;
+}
+
+/* Boost cards */
+
+.boost-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.boost-card {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.boost-card--active {
+  border-color: var(--primary-soft-strong);
+  background: var(--accent-soft);
+}
+
+.boost-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.boost-card__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.boost-card__chips {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.boost-card h3 {
+  font-size: 16.5px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+  color: var(--text-strong);
+}
+
+.boost-card__desc {
+  font-size: 13.5px;
+  color: var(--text-muted);
+  line-height: 1.55;
+  flex: 1;
+}
+
+.boost-card__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+  flex-wrap: wrap;
+}
+
+.boost-card__price {
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--text-strong);
+  letter-spacing: -0.3px;
+}
+
+.boost-card__price small {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.boost-footnote {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.boost-footnote svg {
+  color: var(--accent-strong);
+  transform: rotate(-90deg);
+}
+
+/* Assignment availability hint */
+
+.assign-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--warning);
+  padding: 6px 2px;
+}
+
+/* Order history modal */
+
+.modal-card--history {
+  width: min(640px, 100%);
+}
+
+.history-filters {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.history-filters .field {
+  margin-bottom: 0;
+}
+
+.history-results {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 48svh;
+  overflow-y: auto;
+}
+
+.history-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  background: var(--surface-2);
+}
+
+.history-row__id {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.history-row__id strong {
+  font-size: 14px;
+  color: var(--text-strong);
+}
+
+.history-row__id small {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.history-row__amount {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-strong);
+  white-space: nowrap;
+}
+
+.history-row__rider {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* Tablet & desktop */
+@media screen and (min-width: 768px) {
+  .pod-steps {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .boost-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .waybill-card__body {
+    padding: 24px;
+  }
+
+  .review-card__body {
+    padding: 24px;
+  }
+
+  .pod-panel {
+    padding: 24px;
+  }
+
+  .pipeline-row {
+    grid-template-columns: minmax(150px, 0.8fr) 1.3fr auto auto 130px;
+    gap: 14px;
+  }
+
+  .history-filters {
+    grid-template-columns: 190px 1fr;
+    gap: 14px;
+  }
+
+  .history-row {
+    grid-template-columns: minmax(150px, 1fr) auto auto 140px;
+    align-items: center;
+    gap: 14px;
+  }
+}
+
+/* Phone refinements */
+@media screen and (max-width: 480px) {
+  .waybill-card__body {
+    padding: 16px;
+  }
+
+  .pod-panel {
+    padding: 16px;
+  }
+
+  .pod-confirm {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .boost-card {
+    padding: 18px;
+  }
+}
+
+/* Tablet/container refinements */
+@media screen and (max-width: 1140px) {
+  .boost-grid {
+    gap: 14px;
+  }
+}
