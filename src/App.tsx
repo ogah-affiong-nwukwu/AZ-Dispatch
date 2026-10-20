@@ -16,6 +16,7 @@ import { LandingPage } from './components/LandingPage'
 import { LoginRoute } from './pages/Login'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { SupabaseSetupNotice } from './components/SupabaseSetupNotice'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { Toast } from './components/Toast'
 import { normalizeRole, rolePathFor, ROLE_LABELS } from './data/roles'
 import { isSupabaseConfigured, requireSupabase } from './lib/supabase'
@@ -485,7 +486,8 @@ function App() {
 
   return (
     <div className="app">
-      <Routes>
+      <ErrorBoundary label="routes">
+        <Routes>
         <Route
           path="/"
           element={
@@ -521,14 +523,16 @@ function App() {
               requiredRole="customer"
             >
               {currentUser && (
-                <Suspense fallback={spinnerFallback}>
-                  <CustomerDashboard
-                    user={currentUser}
-                    {...themeProps}
-                    {...chromeProps}
-                    notify={notify}
-                  />
-                </Suspense>
+                <ErrorBoundary label="customer-dashboard">
+                  <Suspense fallback={spinnerFallback}>
+                    <CustomerDashboard
+                      user={currentUser}
+                      {...themeProps}
+                      {...chromeProps}
+                      notify={notify}
+                    />
+                  </Suspense>
+                </ErrorBoundary>
               )}
             </ProtectedRoute>
           }
@@ -545,25 +549,27 @@ function App() {
               requiredRole="business"
             >
               {currentUser && activeRole && (
-                <Suspense fallback={spinnerFallback}>
-                  {activeRole.status === 'active' ? (
-                    <BusinessDashboard
-                      user={currentUser}
-                      boosts={boosts}
-                      {...themeProps}
-                      {...chromeProps}
-                      activateBoost={activateBoost}
-                      notify={notify}
-                    />
-                  ) : (
-                    <MembershipStatusScreen
-                      user={currentUser}
-                      role={activeRole}
-                      {...themeProps}
-                      {...chromeProps}
-                    />
-                  )}
-                </Suspense>
+                <ErrorBoundary label="business-dashboard">
+                  <Suspense fallback={spinnerFallback}>
+                    {activeRole.status === 'active' ? (
+                      <BusinessDashboard
+                        user={currentUser}
+                        boosts={boosts}
+                        {...themeProps}
+                        {...chromeProps}
+                        activateBoost={activateBoost}
+                        notify={notify}
+                      />
+                    ) : (
+                      <MembershipStatusScreen
+                        user={currentUser}
+                        role={activeRole}
+                        {...themeProps}
+                        {...chromeProps}
+                      />
+                    )}
+                  </Suspense>
+                </ErrorBoundary>
               )}
             </ProtectedRoute>
           }
@@ -580,23 +586,25 @@ function App() {
               requiredRole="rider"
             >
               {currentUser && activeRole && (
-                <Suspense fallback={spinnerFallback}>
-                  {activeRole.status === 'active' ? (
-                    <RiderDashboard
-                      user={currentUser}
-                      {...themeProps}
-                      {...chromeProps}
-                      notify={notify}
-                    />
-                  ) : (
-                    <MembershipStatusScreen
-                      user={currentUser}
-                      role={activeRole}
-                      {...themeProps}
-                      {...chromeProps}
-                    />
-                  )}
-                </Suspense>
+                <ErrorBoundary label="rider-dashboard">
+                  <Suspense fallback={spinnerFallback}>
+                    {activeRole.status === 'active' ? (
+                      <RiderDashboard
+                        user={currentUser}
+                        {...themeProps}
+                        {...chromeProps}
+                        notify={notify}
+                      />
+                    ) : (
+                      <MembershipStatusScreen
+                        user={currentUser}
+                        role={activeRole}
+                        {...themeProps}
+                        {...chromeProps}
+                      />
+                    )}
+                  </Suspense>
+                </ErrorBoundary>
               )}
             </ProtectedRoute>
           }
@@ -604,6 +612,7 @@ function App() {
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </ErrorBoundary>
 
       {authModal.open && (
         <AuthModal

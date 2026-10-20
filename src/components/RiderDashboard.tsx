@@ -787,9 +787,9 @@ export function RiderDashboard({
                         <small>{formatDateTime(order.createdAt)}</small>
                       </span>
                       <span
-                        className={`badge ${ORDER_STATUS_META[order.status].badge}`}
+                        className={`badge ${(ORDER_STATUS_META[order.status] ?? ORDER_STATUS_META.placed).badge}`}
                       >
-                        {ORDER_STATUS_META[order.status].label}
+                        {(ORDER_STATUS_META[order.status] ?? ORDER_STATUS_META.placed).label}
                       </span>
                     </div>
                     <p className="delivery-card__item">
@@ -858,9 +858,9 @@ export function RiderDashboard({
                       <small>{formatDateTime(order.createdAt)}</small>
                     </span>
                     <span
-                      className={`badge ${ORDER_STATUS_META[order.status].badge}`}
+                      className={`badge ${(ORDER_STATUS_META[order.status] ?? ORDER_STATUS_META.placed).badge}`}
                     >
-                      {ORDER_STATUS_META[order.status].label}
+                      {(ORDER_STATUS_META[order.status] ?? ORDER_STATUS_META.placed).label}
                     </span>
                   </div>
                   <p className="delivery-card__item">

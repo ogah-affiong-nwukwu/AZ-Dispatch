@@ -227,7 +227,8 @@ export function CustomerOrdersSection({
       ) : (
         <div className="order-list">
           {orders.map((order) => {
-            const meta = ORDER_STATUS_META[order.status]
+            const meta =
+              ORDER_STATUS_META[order.status] ?? ORDER_STATUS_META.placed
             return (
               <div className="card order-card" key={order.id}>
                 <div className="order-card__head">
@@ -245,7 +246,7 @@ export function CustomerOrdersSection({
                       <span>{order.itemDescription}</span>
                     </span>
                   )}
-                  {order.items.map((line) => (
+                  {(order.items ?? []).map((line) => (
                     <span key={line.id} className="order-card__item">
                       <strong>
                         {line.itemName} × {line.quantity}

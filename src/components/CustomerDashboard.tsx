@@ -134,7 +134,7 @@ export function CustomerDashboard({
 
       <main className="dash-main container">
         <div className="page-head">
-          <h1>Welcome back, {user.fullName.split(' ')[0]}</h1>
+          <h1>Welcome back, {(user.fullName ?? '').split(' ')[0] || 'friend'}</h1>
           <p>Order from a business or just order a rider — your choice.</p>
         </div>
 

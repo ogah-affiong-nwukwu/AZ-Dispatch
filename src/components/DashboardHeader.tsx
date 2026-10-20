@@ -40,7 +40,7 @@ export function DashboardHeader({
   const [notifError, setNotifError] = useState<string | null>(null)
   const [unread, setUnread] = useState(0)
 
-  const initials = user.fullName
+  const initials = (user.fullName ?? '')
     .split(' ')
     .map((part) => part.charAt(0))
     .slice(0, 2)

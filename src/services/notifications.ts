@@ -58,28 +58,59 @@ export async function markAllNotificationsRead(userId: string): Promise<void> {
     .eq('read', false)
 }
 
+interface ActiveSubscription {
+  channel: ReturnType<ReturnType<typeof requireSupabase>['channel']>
+  listeners: Set<(notification: AppNotification) => void>
+}
+
+// One realtime channel per user id, shared by every component that
+// subscribes. `supabase.channel(name)` reuses the same cached channel
+// instance for a name, so creating a second `.on(...)` on it after the
+// first `.subscribe()` would throw — the registry avoids that.
+const activeSubscriptions = new Map<string, ActiveSubscription>()
+
 export function subscribeNotifications(
   userId: string,
   onInsert: (notification: AppNotification) => void,
 ): () => void {
   const supabase = requireSupabase()
-  const channel = supabase
-    .channel(`notifications:${userId}`)
-    .on(
-      'postgres_changes',
-      {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'notifications',
-        filter: `user_id=eq.${userId}`,
-      },
-      (payload) => {
-        const row = payload.new as NotificationRow
-        if (row) onInsert(mapNotification(row))
-      },
-    )
-    .subscribe()
+
+  let entry = activeSubscriptions.get(userId)
+  if (!entry) {
+    const channel = supabase
+      .channel(`notifications:${userId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${userId}`,
+        },
+        (payload) => {
+          const row = payload.new as NotificationRow
+          if (!row) return
+          const notification = mapNotification(row)
+          const current = activeSubscriptions.get(userId)
+          for (const listener of current?.listeners ?? []) {
+            listener(notification)
+          }
+        },
+      )
+      .subscribe()
+    entry = { channel, listeners: new Set() }
+    activeSubscriptions.set(userId, entry)
+  }
+
+  entry.listeners.add(onInsert)
+
   return () => {
-    void supabase.removeChannel(channel)
+    const current = activeSubscriptions.get(userId)
+    if (!current) return
+    current.listeners.delete(onInsert)
+    if (current.listeners.size === 0) {
+      void supabase.removeChannel(current.channel)
+      activeSubscriptions.delete(userId)
+    }
   }
 }

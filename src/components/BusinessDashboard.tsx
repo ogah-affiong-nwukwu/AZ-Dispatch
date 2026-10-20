@@ -641,9 +641,9 @@ export function BusinessDashboard({
                       </small>
                     </span>
                     <span
-                      className={`badge ${ORDER_STATUS_META[order.status].badge}`}
+                      className={`badge ${(ORDER_STATUS_META[order.status] ?? ORDER_STATUS_META.placed).badge}`}
                     >
-                      {ORDER_STATUS_META[order.status].label}
+                      {(ORDER_STATUS_META[order.status] ?? ORDER_STATUS_META.placed).label}
                     </span>
                   </div>
 
