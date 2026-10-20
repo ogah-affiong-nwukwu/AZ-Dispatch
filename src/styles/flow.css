@@ -1,0 +1,300 @@
+/* ---------------------------------------------------------------
+   AZ Delivery — order flow UI (white & blue palette)
+---------------------------------------------------------------- */
+
+/* ---------- Customer: business / rider choice ---------- */
+.choice-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  background: #eef4ff;
+  padding: 4px;
+  border-radius: 16px;
+  margin-bottom: 20px;
+}
+
+.choice-tabs__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.25rem;
+  font-weight: 600;
+  padding: 12px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.choice-tabs__btn:hover {
+  color: #0b1b3f;
+}
+
+.choice-tabs__btn--active {
+  background: #ffffff;
+  color: #1d4ed8;
+  box-shadow:
+    0 2px 10px rgba(29, 78, 216, 0.2),
+    0 1px 3px rgba(11, 27, 63, 0.1);
+}
+
+/* ---------- Customer: business picker + banner ---------- */
+.business-picker {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+}
+
+.business-picker .input {
+  max-width: 340px;
+}
+
+.business-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  border-left: 4px solid #1d4ed8;
+}
+
+.business-banner__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.business-banner__body strong {
+  font-size: 15px;
+  color: #0b1b3f;
+}
+
+.business-banner__body span {
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* ---------- Flow timeline ---------- */
+.flow-timeline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  padding: 12px 0 4px;
+}
+
+.flow-timeline__step {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #94a3b8;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.flow-timeline__dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #c5ceda;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  background: #ffffff;
+}
+
+.flow-timeline__step--done {
+  color: #0b1b3f;
+}
+
+.flow-timeline__step--done .flow-timeline__dot {
+  border-color: #1d4ed8;
+  background: #1d4ed8;
+  color: #ffffff;
+}
+
+.flow-timeline__step--current {
+  color: #1d4ed8;
+}
+
+.flow-timeline__step--current .flow-timeline__dot {
+  border-color: #1d4ed8;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.14);
+  animation: flow-dot-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes flow-dot-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.14);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(29, 78, 216, 0.06);
+  }
+}
+
+/* ---------- Confirm boxes (code entry / done) ---------- */
+.confirm-box--success {
+  border: 1px solid rgba(22, 163, 74, 0.25);
+  background: #f0fdf4;
+}
+
+.confirm-box--done {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(22, 163, 74, 0.25);
+  background: #f0fdf4;
+  color: #15803d;
+  font-weight: 600;
+}
+
+.confirm-box--failed {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(220, 38, 38, 0.25);
+  background: #fef2f2;
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+/* ---------- Order history (events) ---------- */
+.event-history {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 12px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #f2f7ff;
+}
+
+.event-history__row {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+}
+
+.event-history__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #60a5fa;
+  flex-shrink: 0;
+  transform: translateY(-1px);
+}
+
+.event-history__text {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 6px;
+  font-size: 13px;
+  color: #0b1b3f;
+}
+
+.event-history__text small {
+  color: #64748b;
+}
+
+/* ---------- Rider identity (business pickup confirm) ---------- */
+.rider-identity {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 14px;
+  background: #eef4ff;
+  border: 1px solid rgba(29, 78, 216, 0.18);
+  border-radius: 10px;
+  margin: 8px 0;
+}
+
+.rider-identity strong {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #0b1b3f;
+}
+
+.rider-identity span {
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* ---------- Business details card ---------- */
+.details-card {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* ---------- Rider clock-in card ---------- */
+.clock-card {
+  padding: 18px 20px;
+  margin-bottom: 20px;
+}
+
+.clock-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.clock-card__form {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.clock-card__form .input {
+  max-width: 220px;
+}
+
+/* ---------- Responsive ---------- */
+@media screen and (max-width: 480px) {
+  .choice-tabs {
+    grid-template-columns: 1fr;
+  }
+
+  .business-picker {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .business-picker .input {
+    max-width: none;
+  }
+
+  .clock-card__form {
+    width: 100%;
+  }
+
+  .clock-card__form .input {
+    max-width: none;
+    width: 100%;
+  }
+
+  .flow-timeline {
+    gap: 4px 12px;
+  }
+}
+
+@media screen and (max-width: 1140px) {
+  .clock-card__form .input {
+    max-width: 180px;
+  }
+}

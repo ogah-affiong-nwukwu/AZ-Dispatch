@@ -1,5 +1,7 @@
 import type { Address, TrackingEvent } from '../types'
 
+export const DEFAULT_DELIVERY_FEE_NGN = 1500
+
 export const AZ_HUB: Address = {
   label: 'AZ Hub — Ikeja',
   line1: '14 Industrial Avenue',

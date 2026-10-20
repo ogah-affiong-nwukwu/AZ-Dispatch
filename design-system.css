@@ -1,0 +1,233 @@
+/* ==========================================================
+   DISPATCH DESIGN SYSTEM
+   Paste into App.css (or import from main.jsx).
+   Fonts: add this to index.html <head>
+   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+   ========================================================== */
+
+:root {
+  /* ---------- COLOR: PRIMARY (cobalt, actions + brand) ---------- */
+  --primary-50:  #EEF3FF;
+  --primary-100: #DCE6FF;
+  --primary-200: #BACDFF;
+  --primary-300: #8CABFF;
+  --primary-400: #5A82F5;
+  --primary-500: #3562E8;
+  --primary-600: #1E47CC; /* default buttons, links */
+  --primary-700: #1739A3; /* hover */
+  --primary-800: #152F7F;
+  --primary-900: #12275F;
+
+  /* ---------- COLOR: SECONDARY (teal, in-transit / live states) ---------- */
+  --secondary-50:  #E7F8F5;
+  --secondary-100: #C5EEE7;
+  --secondary-200: #93DFD2;
+  --secondary-300: #5CCBBB;
+  --secondary-400: #2FB3A1;
+  --secondary-500: #17978A;
+  --secondary-600: #107A71; /* default */
+  --secondary-700: #0F615B;
+  --secondary-800: #0F4E4A;
+  --secondary-900: #0D3F3C;
+
+  /* ---------- COLOR: TERTIARY (amber, pending / attention) ---------- */
+  --tertiary-50:  #FFF7E6;
+  --tertiary-100: #FFEBBF;
+  --tertiary-200: #FFDB8A;
+  --tertiary-300: #FFC74F;
+  --tertiary-400: #FFB41F;
+  --tertiary-500: #F59A07; /* default */
+  --tertiary-600: #D97A03;
+  --tertiary-700: #B45A07;
+  --tertiary-800: #92450C;
+  --tertiary-900: #783A0D;
+
+  /* ---------- COLOR: NEUTRAL (cool slate, text + surfaces) ---------- */
+  --neutral-0:   #FFFFFF;
+  --neutral-50:  #F6F8FB; /* page background */
+  --neutral-100: #EDF1F6;
+  --neutral-200: #DEE4EC; /* borders */
+  --neutral-300: #C5CEDA;
+  --neutral-400: #9AA6B6;
+  --neutral-500: #6F7C8E;
+  --neutral-600: #55616F;
+  --neutral-700: #414B58;
+  --neutral-800: #2A323D;
+  --neutral-900: #171C24; /* headings */
+
+  /* ---------- COLOR: MUTED (quiet backgrounds, disabled, helper text) ---------- */
+  --muted-bg:      #F1F4F9;
+  --muted-border:  #DFE5ED;
+  --muted-text:    #6F7C8E;
+  --muted-primary: #E8EEFD;
+  --muted-success: #E6F6EC;
+  --muted-danger:  #FDECEC;
+
+  /* ---------- COLOR: FEEDBACK ---------- */
+  --success: #16A34A;
+  --warning: var(--tertiary-500);
+  --danger:  #DC2626;
+  --info:    var(--primary-600);
+
+  /* ---------- DISPATCH STATUS COLORS ---------- */
+  --status-pending:    var(--tertiary-500);
+  --status-assigned:   var(--primary-600);
+  --status-in-transit: var(--secondary-600);
+  --status-delivered:  var(--success);
+  --status-delayed:    var(--danger);
+
+  /* ---------- SEMANTIC ALIASES (use these in components) ---------- */
+  --color-bg:           var(--neutral-50);
+  --color-surface:      var(--neutral-0);
+  --color-border:       var(--neutral-200);
+  --color-text:         var(--neutral-900);
+  --color-text-soft:    var(--neutral-600);
+  --color-text-muted:   var(--muted-text);
+  --color-brand:        var(--primary-600);
+  --color-brand-hover:  var(--primary-700);
+  --color-focus-ring:   var(--primary-300);
+
+  /* ---------- TYPOGRAPHY: FAMILIES ---------- */
+  --font-heading: "Manrope", system-ui, sans-serif;
+  --font-body:    "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono:    "IBM Plex Mono", ui-monospace, monospace; /* order IDs, tracking numbers, ETAs */
+
+  /* ---------- TYPOGRAPHY: SIZE SCALE (smallest to biggest) ---------- */
+  --text-xs:   0.75rem;   /* 12px  captions, badges */
+  --text-sm:   0.875rem;  /* 14px  table cells, helper text */
+  --text-base: 1rem;      /* 16px  body */
+  --text-lg:   1.125rem;  /* 18px  lead paragraph */
+  --text-xl:   1.25rem;   /* 20px  card titles */
+  --text-2xl:  1.5rem;    /* 24px  h4 / section titles */
+  --text-3xl:  1.875rem;  /* 30px  h3 */
+  --text-4xl:  2.25rem;   /* 36px  h2 */
+  --text-5xl:  3rem;      /* 48px  h1 */
+  --text-6xl:  3.75rem;   /* 60px  hero headline */
+
+  /* ---------- TYPOGRAPHY: LINE HEIGHTS (paired with sizes above) ---------- */
+  --leading-xs:   1rem;       /* 16px */
+  --leading-sm:   1.25rem;    /* 20px */
+  --leading-base: 1.5rem;     /* 24px */
+  --leading-lg:   1.75rem;    /* 28px */
+  --leading-xl:   1.75rem;    /* 28px */
+  --leading-2xl:  2rem;       /* 32px */
+  --leading-3xl:  2.375rem;   /* 38px */
+  --leading-4xl:  2.75rem;    /* 44px */
+  --leading-5xl:  3.5rem;     /* 56px */
+  --leading-6xl:  4.125rem;   /* 66px */
+
+  /* ---------- TYPOGRAPHY: WEIGHTS + TRACKING ---------- */
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+  --weight-extrabold: 800;
+  --tracking-tight:  -0.02em; /* large headings */
+  --tracking-normal: 0;
+
+  /* ---------- SHADOWS (navy-tinted, not pure black) ---------- */
+  --shadow-soft:   0 1px 2px rgba(23, 28, 36, 0.06),
+                   0 2px 6px rgba(23, 28, 36, 0.05);   /* cards, inputs */
+  --shadow-medium: 0 4px 8px rgba(23, 28, 36, 0.08),
+                   0 8px 24px rgba(23, 28, 36, 0.10);  /* dropdowns, hovered cards */
+  --shadow-hard:   0 12px 24px rgba(23, 28, 36, 0.16),
+                   0 24px 56px rgba(23, 28, 36, 0.22); /* modals, driver assignment panel */
+
+  /* ---------- RADIUS ---------- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+}
+
+/* ==========================================================
+   BASE
+   ========================================================== */
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-base);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-heading);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-tight);
+  color: var(--neutral-900);
+  margin: 0;
+}
+
+h1 { font-size: var(--text-5xl); line-height: var(--leading-5xl); font-weight: var(--weight-extrabold); }
+h2 { font-size: var(--text-4xl); line-height: var(--leading-4xl); }
+h3 { font-size: var(--text-3xl); line-height: var(--leading-3xl); }
+h4 { font-size: var(--text-2xl); line-height: var(--leading-2xl); }
+
+.text-hero { font-family: var(--font-heading); font-size: var(--text-6xl); line-height: var(--leading-6xl); font-weight: var(--weight-extrabold); letter-spacing: var(--tracking-tight); }
+.text-lead { font-size: var(--text-lg);  line-height: var(--leading-lg); color: var(--color-text-soft); }
+.text-sm   { font-size: var(--text-sm);  line-height: var(--leading-sm); }
+.text-xs   { font-size: var(--text-xs);  line-height: var(--leading-xs); }
+.text-mono { font-family: var(--font-mono); font-size: var(--text-sm); line-height: var(--leading-sm); }
+
+/* Shadow utilities */
+.shadow-soft   { box-shadow: var(--shadow-soft); }
+.shadow-medium { box-shadow: var(--shadow-medium); }
+.shadow-hard   { box-shadow: var(--shadow-hard); }
+
+/* Accessible keyboard focus */
+:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* ==========================================================
+   EXAMPLE COMPONENTS
+   ========================================================== */
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  padding: 1.25rem;
+  transition: box-shadow 0.2s ease;
+}
+.card:hover { box-shadow: var(--shadow-medium); }
+
+.modal {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-hard);
+}
+
+.btn {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  font-weight: var(--weight-semibold);
+  padding: 0.625rem 1.125rem;
+  border: 0;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+.btn-primary   { background: var(--primary-600);   color: #fff; }
+.btn-primary:hover { background: var(--primary-700); }
+.btn-secondary { background: var(--secondary-600); color: #fff; }
+.btn-tertiary  { background: var(--tertiary-100);  color: var(--tertiary-800); }
+.btn-muted     { background: var(--muted-bg);      color: var(--neutral-700); }
+
+.badge {
+  display: inline-block;
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  font-weight: var(--weight-semibold);
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-pill);
+}
+.badge-pending    { background: var(--tertiary-100);  color: var(--tertiary-800); }
+.badge-assigned   { background: var(--primary-100);   color: var(--primary-800); }
+.badge-in-transit { background: var(--secondary-100); color: var(--secondary-800); }
+.badge-delivered  { background: var(--muted-success); color: #0F6B33; }
+.badge-delayed    { background: var(--muted-danger);  color: #A61B1B; }

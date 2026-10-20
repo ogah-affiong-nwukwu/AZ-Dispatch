@@ -36,7 +36,7 @@ export function IconLogo({ size = 34 }: IconProps) {
       fill="none"
       aria-hidden="true"
     >
-      <rect width="40" height="40" rx="10" fill="#166534" />
+      <rect width="40" height="40" rx="10" fill="var(--color-brand)" />
       <text
         x="20"
         y="26.5"
@@ -44,14 +44,14 @@ export function IconLogo({ size = 34 }: IconProps) {
         fontFamily="inherit"
         fontSize="16"
         fontWeight="800"
-        fill="#ffffff"
+        fill="var(--neutral-0)"
         letterSpacing="0.5"
       >
         AZ
       </text>
       <path
         d="m27.5 9.5-3.4 3.4-1.6-1.6"
-        stroke="#4ade80"
+        stroke="var(--secondary-400)"
         strokeWidth="2.4"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -371,6 +371,44 @@ export function IconSearch(props: IconProps) {
   )
 }
 
+export function IconImage(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <rect x="3" y="3" width="18" height="18" rx="2" />
+      <circle cx="9" cy="9" r="2" />
+      <path d="m21 15-3.09-3.09a2 2 0 0 0-2.82 0L6 21" />
+    </Svg>
+  )
+}
+
+export function IconPlus(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M5 12h14" />
+      <path d="M12 5v14" />
+    </Svg>
+  )
+}
+
+export function IconUpload(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <path d="m17 8-5-5-5 5" />
+      <path d="M12 3v12" />
+    </Svg>
+  )
+}
+
+export function IconBell(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+    </Svg>
+  )
+}
+
 export function IconCalendar(props: IconProps) {
   return (
     <Svg {...props}>
@@ -398,6 +436,31 @@ export function IconPower(props: IconProps) {
     <Svg {...props}>
       <path d="M12 2v10" />
       <path d="M18.4 6.6a9 9 0 1 1-12.77.04" />
+    </Svg>
+  )
+}
+
+export function IconMotorbike(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <circle cx="6.5" cy="17.5" r="3.2" />
+      <circle cx="17.5" cy="17.5" r="3.2" />
+      <path d="M6.5 17.5 9.4 10.6h3.3" />
+      <path d="M12.7 10.6l2.2-3.2h3.6" />
+      <path d="M15.6 10.6 19.9 14.4" />
+      <path d="M18.5 7.4 17.5 17.5" />
+    </Svg>
+  )
+}
+
+export function IconStore(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7" />
+      <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+      <path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4" />
+      <path d="M2 7h20" />
+      <path d="M22 7v3a2 2 0 0 1-2 2 2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12a2 2 0 0 1-2-2V7" />
     </Svg>
   )
 }

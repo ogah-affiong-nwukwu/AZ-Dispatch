@@ -1,0 +1,177 @@
+/* Business items — daily listings with photos */
+
+.items-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.item-card {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.item-card__media {
+  aspect-ratio: 16 / 10;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.item-card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.item-card__body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.item-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.item-card__head h3 {
+  font-size: var(--text-base);
+  line-height: var(--leading-base);
+  font-weight: var(--weight-bold);
+  color: var(--color-text);
+}
+
+.item-card__desc {
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  color: var(--color-text-soft);
+}
+
+.item-card__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--color-border);
+  padding-top: 10px;
+  margin-top: auto;
+}
+
+.item-card__price {
+  font-size: var(--text-lg);
+  line-height: var(--leading-lg);
+  font-weight: var(--weight-extrabold);
+  color: var(--color-text);
+}
+
+.item-card__price small {
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  color: var(--color-text-muted);
+  font-weight: var(--weight-semibold);
+}
+
+.item-card__actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+}
+
+.modal-card--item {
+  width: min(560px, 100%);
+}
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.photo-thumb {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--surface-2);
+  border: 1px solid var(--color-border);
+}
+
+.photo-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: var(--neutral-900);
+  color: var(--neutral-0);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.photo-add {
+  aspect-ratio: 1;
+  border: 1.5px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+}
+
+.photo-add:hover {
+  border-color: var(--color-brand);
+  color: var(--color-brand);
+  background: var(--muted-primary);
+}
+
+/* Tablet & desktop */
+@media screen and (min-width: 768px) {
+  .items-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .photo-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Phone refinements */
+@media screen and (max-width: 480px) {
+  .items-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .item-card__body {
+    padding: 14px;
+  }
+}
+
+/* Tablet/container refinements */
+@media screen and (max-width: 1140px) {
+  .items-grid {
+    gap: 14px;
+  }
+}

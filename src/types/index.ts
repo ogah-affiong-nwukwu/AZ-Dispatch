@@ -1,5 +1,256 @@
 export type Role = 'customer' | 'rider' | 'business'
 
+export type RoleStatus = 'active' | 'pending' | 'rejected'
+
+export type MemberType = 'business' | 'rider'
+
+export type MemberStatus = 'pending' | 'approved' | 'rejected'
+
+export interface Company {
+  id: string
+  ownerUserId: string
+  name: string
+  address: string
+  city: string
+  state: string
+  phone: string
+  bankName: string
+  bankAccountName: string
+  bankAccountNumber: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CompanyInput {
+  name: string
+  address: string
+  city: string
+  state: string
+  phone: string
+  bankName: string
+  bankAccountName: string
+  bankAccountNumber: string
+}
+
+export interface CompanyMember {
+  id: string
+  companyId: string
+  userId: string
+  memberType: MemberType
+  status: MemberStatus
+  rejectionReason: string | null
+  reviewedBy: string | null
+  reviewedAt: string | null
+  createdAt: string
+  updatedAt: string
+  profile?: { fullName: string; phone: string | null }
+}
+
+export interface ItemImage {
+  id: string
+  itemId: string
+  storagePath: string
+  position: number
+  createdAt: string
+  url: string | null
+}
+
+export interface Item {
+  id: string
+  businessUserId: string
+  companyId: string
+  name: string
+  description: string
+  priceNaira: number
+  quantity: number
+  isAvailable: boolean
+  listedOn: string
+  createdAt: string
+  updatedAt: string
+  images: ItemImage[]
+}
+
+export interface ItemInput {
+  name: string
+  description: string
+  priceNaira: string
+  quantity: string
+}
+
+export interface ShopItem extends Item {
+  businessName: string
+}
+
+export type PaymentStatus = 'awaiting' | 'submitted' | 'confirmed' | 'rejected'
+
+export interface CustomerPayment {
+  id: string
+  orderId: string
+  status: PaymentStatus
+  slipPath: string | null
+  slipType: 'image' | 'pdf' | null
+  slipUrl: string | null
+  rejectionReason: string | null
+  reviewedAt: string | null
+  createdAt: string
+}
+
+export interface CustomerOrderItem {
+  id: string
+  orderId: string
+  itemId: string | null
+  itemName: string
+  unitPriceNaira: number
+  quantity: number
+  createdAt: string
+}
+
+export interface CustomerOrder {
+  id: string
+  orderNumber: string
+  customerUserId: string
+  companyId: string | null
+  businessUserId: string | null
+  kind: 'shop' | 'rider_only'
+  status: OrderStatus
+  itemTotalNaira: number
+  deliveryFeeNaira: number
+  totalNaira: number
+  itemDescription: string | null
+  pickupAddress: Address | null
+  pickupPhone: string | null
+  deliveryAddress: Address | null
+  recipientName: string | null
+  recipientPhone: string | null
+  linkedOrderId: string | null
+  prepMinutes: number | null
+  businessAcceptedAt: string | null
+  readyAt: string | null
+  riderRequestedAt: string | null
+  waitingDeadline: string | null
+  declineReason: string | null
+  failureReason: string | null
+  createdAt: string
+  updatedAt: string
+  items: CustomerOrderItem[]
+  payment: CustomerPayment | null
+  delivery: CustomerDeliveryState | null
+  company: Company | null
+}
+
+export type DeliveryState =
+  | 'accepted'
+  | 'picked_up'
+  | 'delivered_pending_code'
+  | 'delivered'
+  | 'cancelled'
+
+export interface CustomerDeliveryState {
+  id: string
+  status: DeliveryState
+  failedAttempts: number
+}
+
+export interface RiderJob {
+  deliveryId: string | null
+  orderId: string
+  orderNumber: string
+  status: OrderStatus
+  deliveryStatus: DeliveryState | null
+  companyName: string
+  pickupLabel: string
+  dropOffLabel: string
+  feeNaira: number
+  itemSummary: string
+  createdAt: string
+}
+
+export interface AppNotification {
+  id: string
+  userId: string
+  title: string
+  body: string
+  kind: string
+  orderId: string | null
+  read: boolean
+  createdAt: string
+}
+
+export interface BusinessProfile {
+  userId: string
+  businessName: string
+  businessAddress: string | null
+  businessPhone: string | null
+}
+
+export interface OrderProgress {
+  pickupVerified: boolean
+  businessConfirmed: boolean
+  deliveryVerified: boolean
+  pickupLocked: boolean
+  deliveryLocked: boolean
+  pickupAttempts: number
+  deliveryAttempts: number
+  ready: boolean
+  businessAcceptedAt: string | null
+  readyAt: string | null
+  riderRequestedAt: string | null
+  waitingDeadline: string | null
+  prepMinutes: number | null
+  declineReason: string | null
+  failureReason: string | null
+}
+
+export interface OrderEvent {
+  id: string
+  orderId: string
+  actorUserId: string | null
+  actorRole: string | null
+  event: string
+  details: string | null
+  createdAt: string
+}
+
+export interface RiderIdentity {
+  fullName: string | null
+  phone: string | null
+  vehicleType: string | null
+  plateNumber: string | null
+}
+
+export interface UserRole {
+  id: string
+  userId: string
+  roleType: Role
+  companyId: string | null
+  status: RoleStatus
+  createdAt: string
+  updatedAt: string
+}
+
+export type OrderStatus =
+  | 'draft'
+  | 'awaiting_payment'
+  | 'payment_submitted'
+  | 'payment_confirmed'
+  | 'payment_rejected'
+  | 'awaiting_business_approval'
+  | 'awaiting_rider'
+  | 'rider_assigned'
+  | 'picked_up'
+  | 'delivered'
+  | 'delayed'
+  | 'cancelled'
+  | 'placed'
+  | 'accepted_by_business'
+  | 'ready_for_pickup'
+  | 'rider_requested'
+  | 'rider_accepted'
+  | 'arrived_at_pickup'
+  | 'pickup_verified'
+  | 'arrived_at_destination'
+  | 'delivery_failed'
+
 export type DeliveryStatus =
   | 'pending_approval'
   | 'approved'
@@ -100,27 +351,22 @@ export interface RegistrationInput {
   phone: string
   role: Role
   businessName?: string
+  businessAddress?: string
+  businessPhone?: string
+  vehicleType?: string
+  plateNumber?: string
+  zone?: string
 }
 
 export interface User {
   id: string
   fullName: string
   email: string
-  password: string
   phone: string
   role: Role
   businessName?: string
   defaultAddress?: Address
   riderProfile?: RiderProfile
-}
-
-export interface AuthSession {
-  userId: string
-  fullName: string
-  email: string
-  role: Role
-  remembered: boolean
-  loginAt: string
 }
 
 export interface PaymentResult {

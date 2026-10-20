@@ -4,7 +4,7 @@
   position: fixed;
   inset: 0;
   z-index: 100;
-  background: rgba(2, 20, 12, 0.62);
+  background: color-mix(in srgb, var(--neutral-900) 62%, transparent);
   display: grid;
   place-items: center;
   padding: 20px;
@@ -24,7 +24,7 @@
   width: min(480px, 100%);
   background: var(--surface);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-hard);
   overflow: hidden;
   max-height: 90svh;
   overflow-y: auto;
@@ -44,7 +44,7 @@
 
 .modal-card__head {
   background: var(--primary-strong);
-  color: #ffffff;
+  color: var(--neutral-0);
   padding: 16px 20px;
   display: flex;
   align-items: center;
@@ -54,39 +54,42 @@
 .flw-mark {
   width: 30px;
   height: 30px;
-  border-radius: 8px;
-  background: #f5a623;
-  color: #ffffff;
+  border-radius: var(--radius-sm);
+  background: var(--tertiary-400);
+  color: var(--neutral-0);
   display: grid;
   place-items: center;
-  font-weight: 900;
-  font-size: 12.5px;
-  font-family: 'Consolas', 'Menlo', monospace;
+  font-weight: var(--weight-extrabold);
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  font-family: var(--font-mono);
   flex-shrink: 0;
 }
 
 .modal-card__head strong {
   flex: 1;
-  font-size: 14.5px;
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
 }
 
 .test-chip {
-  font-size: 10px;
-  font-weight: 800;
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  font-weight: var(--weight-extrabold);
   letter-spacing: 0.7px;
-  background: #f5a623;
-  color: #221503;
+  background: var(--tertiary-400);
+  color: var(--neutral-900);
   padding: 4px 9px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
 }
 
 .modal-close {
-  background: rgba(255, 255, 255, 0.14);
+  background: color-mix(in srgb, var(--neutral-0) 14%, transparent);
   border: none;
-  color: #ffffff;
+  color: var(--neutral-0);
   width: 32px;
   height: 32px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   display: grid;
   place-items: center;
   cursor: pointer;
@@ -95,7 +98,7 @@
 }
 
 .modal-close:hover {
-  background: rgba(255, 255, 255, 0.26);
+  background: color-mix(in srgb, var(--neutral-0) 26%, transparent);
 }
 
 .modal-card__body {
@@ -114,7 +117,7 @@
 .pay-merchant__logo {
   width: 40px;
   height: 40px;
-  border-radius: 11px;
+  border-radius: var(--radius-md);
   background: var(--primary-soft);
   color: var(--primary);
   display: grid;
@@ -124,13 +127,15 @@
 
 .pay-merchant strong {
   display: block;
-  font-size: 14.5px;
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
   color: var(--text-strong);
 }
 
 .pay-merchant span {
   display: block;
-  font-size: 12.5px;
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
   color: var(--text-muted);
 }
 
@@ -143,19 +148,21 @@
 }
 
 .pay-amount small {
-  font-size: 12px;
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
   color: var(--text-muted);
-  font-weight: 700;
+  font-weight: var(--weight-bold);
   text-transform: uppercase;
   letter-spacing: 0.8px;
 }
 
 .pay-amount strong {
   display: block;
-  font-size: 30px;
-  font-weight: 800;
+  font-size: var(--text-3xl);
+  line-height: var(--leading-3xl);
+  font-weight: var(--weight-extrabold);
   color: var(--text-strong);
-  letter-spacing: -1px;
+  letter-spacing: var(--tracking-tight);
   margin-top: 4px;
 }
 
@@ -170,7 +177,8 @@
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  font-size: 13.5px;
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
 }
 
 .pay-row span:first-child {
@@ -180,12 +188,13 @@
 
 .pay-row span:last-child {
   color: var(--text-strong);
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   text-align: right;
 }
 
 .pay-note {
-  font-size: 12.5px;
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
   color: var(--text-muted);
   display: flex;
   gap: 7px;
@@ -220,12 +229,14 @@
 
 .pay-processing strong {
   color: var(--text-strong);
-  font-size: 16px;
+  font-size: var(--text-base);
+  line-height: var(--leading-base);
 }
 
 .pay-processing p {
   color: var(--text-muted);
-  font-size: 14px;
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
   max-width: 320px;
 }
 
@@ -257,25 +268,28 @@
 }
 
 .pay-success h3 {
-  font-size: 20px;
-  font-weight: 800;
+  font-size: var(--text-xl);
+  line-height: var(--leading-xl);
+  font-weight: var(--weight-extrabold);
   color: var(--text-strong);
-  letter-spacing: -0.3px;
+  letter-spacing: var(--tracking-tight);
 }
 
 .pay-success p {
-  font-size: 13.5px;
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
   color: var(--text-muted);
   max-width: 330px;
 }
 
 .pay-ref {
-  font-family: 'Consolas', 'Menlo', 'Courier New', monospace;
-  font-size: 12.5px;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
   background: var(--surface-2);
   border: 1px solid var(--border);
   padding: 7px 13px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   color: var(--text-muted);
 }
 
@@ -300,7 +314,8 @@
 
   .modal-card {
     max-height: 88svh;
-    border-radius: var(--radius-lg) var(--radius-lg) 14px 14px;
+    border-radius: var(--radius-lg) var(--radius-lg) var(--radius-md)
+      var(--radius-md);
   }
 
   .modal-card__actions {
@@ -308,7 +323,8 @@
   }
 
   .pay-amount strong {
-    font-size: 26px;
+    font-size: var(--text-2xl);
+    line-height: var(--leading-2xl);
   }
 }
 
