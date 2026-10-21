@@ -46,20 +46,22 @@ export function RiderRequestSection({
   const [dropOff, setDropOff] = useState<AddressForm>(EMPTY_ADDRESS)
   const [deliveryPhone, setDeliveryPhone] = useState('')
   const [itemDescription, setItemDescription] = useState('')
-  const [feeNgn, setFeeNgn] = useState('')
   const [errors, setErrors] = useState<string[]>([])
   const [submitting, setSubmitting] = useState(false)
 
+  // Prefill pickup from the linked business (address + phone). Only
+  // fills EMPTY fields so a late-arriving business profile never
+  // overwrites what the customer already typed, and the values are
+  // really stored in the form state.
   useEffect(() => {
-    if (linkedOrderId && linkedBusiness) {
-      setPickup({
-        label: linkedBusiness.businessName,
-        line1: linkedBusiness.businessAddress ?? '',
-        city: '',
-        state: '',
-      })
-      setPickupPhone(linkedBusiness.businessPhone ?? '')
-    }
+    if (!linkedOrderId || !linkedBusiness) return
+    setPickup((current) => ({
+      label: current.label || linkedBusiness.businessName,
+      line1: current.line1 || linkedBusiness.businessAddress || '',
+      city: current.city,
+      state: current.state,
+    }))
+    setPickupPhone((current) => current || linkedBusiness.businessPhone || '')
   }, [linkedOrderId, linkedBusiness])
 
   useEffect(() => {
@@ -67,14 +69,14 @@ export function RiderRequestSection({
     fetchCustomerProfile(user.id)
       .then((profile) => {
         if (!active || !profile) return
-        setDeliveryPhone((current) => profile.phone ?? current)
+        setDeliveryPhone((current) => current || profile.phone || '')
         if (profile.defaultAddress) {
-          setDropOff({
-            label: profile.defaultAddress.label,
-            line1: profile.defaultAddress.line1,
-            city: profile.defaultAddress.city,
-            state: profile.defaultAddress.state,
-          })
+          setDropOff((current) => ({
+            label: current.label || profile.defaultAddress!.label,
+            line1: current.line1 || profile.defaultAddress!.line1,
+            city: current.city || profile.defaultAddress!.city,
+            state: current.state || profile.defaultAddress!.state,
+          }))
         }
       })
       .catch(() => {
@@ -86,11 +88,15 @@ export function RiderRequestSection({
     }
   }, [user.id])
 
+  const clearErrors = () => setErrors([])
+
   const setPickupField = (key: keyof AddressForm, value: string) => {
+    clearErrors()
     setPickup((current) => ({ ...current, [key]: value }))
   }
 
   const setDropOffField = (key: keyof AddressForm, value: string) => {
+    clearErrors()
     setDropOff((current) => ({ ...current, [key]: value }))
   }
 
@@ -102,12 +108,6 @@ export function RiderRequestSection({
     if (!deliveryPhone.trim()) issues.push('Delivery phone is required.')
     if (!itemDescription.trim()) {
       issues.push('Describe the item you are sending.')
-    }
-    if (!linkedOrderId) {
-      const fee = Number(feeNgn)
-      if (!Number.isFinite(fee) || fee <= 0) {
-        issues.push('Enter a valid delivery fee.')
-      }
     }
     setErrors(issues)
     if (issues.length > 0) return
@@ -155,7 +155,6 @@ export function RiderRequestSection({
             dropOff: dropOffAddress,
             deliveryPhone: deliveryPhone.trim(),
             itemDescription,
-            deliveryFee: Math.floor(Number(feeNgn)),
             recipientName: user.fullName,
           })
         ).error ?? null
@@ -165,12 +164,11 @@ export function RiderRequestSection({
       return
     }
     setItemDescription('')
-    setFeeNgn('')
     setErrors([])
     notify(
       linkedOrderId
-        ? 'Rider requested for your order.'
-        : 'Dispatch request placed — a rider will pick it up soon.',
+        ? 'Rider requested — riders will now quote a price for you.'
+        : 'Dispatch request placed — riders will quote a price for you.',
     )
     onPlaced()
   }
@@ -239,7 +237,10 @@ export function RiderRequestSection({
               inputMode="tel"
               placeholder="+234 800 000 0000"
               value={pickupPhone}
-              onChange={(event) => setPickupPhone(event.target.value)}
+              onChange={(event) => {
+                clearErrors()
+                setPickupPhone(event.target.value)
+              }}
             />
           </div>
 
@@ -282,27 +283,12 @@ export function RiderRequestSection({
               inputMode="tel"
               placeholder="+234 800 000 0000"
               value={deliveryPhone}
-              onChange={(event) => setDeliveryPhone(event.target.value)}
+              onChange={(event) => {
+                clearErrors()
+                setDeliveryPhone(event.target.value)
+              }}
             />
           </div>
-
-          {!linkedOrderId && (
-            <div className="field">
-              <label className="label" htmlFor="rider-req-fee">
-                Delivery fee (₦)
-              </label>
-              <input
-                id="rider-req-fee"
-                className="input"
-                inputMode="numeric"
-                placeholder="e.g. 2000"
-                value={feeNgn}
-                onChange={(event) =>
-                  setFeeNgn(event.target.value.replace(/[^\d.]/g, ''))
-                }
-              />
-            </div>
-          )}
 
           <div className="field field--full">
             <label className="label" htmlFor="rider-req-item">
@@ -314,7 +300,10 @@ export function RiderRequestSection({
               rows={3}
               placeholder="What are you sending? e.g. Laptop in padded box, 2.5 kg"
               value={itemDescription}
-              onChange={(event) => setItemDescription(event.target.value)}
+              onChange={(event) => {
+                clearErrors()
+                setItemDescription(event.target.value)
+              }}
             />
           </div>
         </div>

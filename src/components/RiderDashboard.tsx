@@ -10,7 +10,7 @@ import type {
 import type { ThemeMode } from '../utils/storage'
 import { formatDateTime, formatNgn } from '../utils/format'
 import {
-  acceptRiderRequest,
+  expireStaleQuotes,
   fetchOrderEvents,
   fetchRiderJobs,
   fetchRiderRequests,
@@ -19,6 +19,7 @@ import {
   riderArrivedPickup,
   riderMarkNotReachable,
   riderMarkNotResponding,
+  riderQuotePrice,
   riderReportFailedDelivery,
   verifyDeliveryCode,
   verifyPickupCode,
@@ -35,6 +36,7 @@ import { EVENT_LABELS } from '../data/flowSteps'
 import {
   DESTINATION_RESPOND_MINUTES,
   PICKUP_WAIT_MINUTES,
+  QUOTE_HOLD_MINUTES,
 } from '../data/flowConstants'
 import { DashboardFooter } from './DashboardFooter'
 import { DashboardHeader } from './DashboardHeader'
@@ -100,7 +102,9 @@ export function RiderDashboard({
   const [jobsLoading, setJobsLoading] = useState(true)
   const [jobsError, setJobsError] = useState<string | null>(null)
   const [myJobs, setMyJobs] = useState<CustomerOrder[]>([])
-  const [acceptBusyId, setAcceptBusyId] = useState<string | null>(null)
+  const [quoteBusyId, setQuoteBusyId] = useState<string | null>(null)
+  const [quoteInputs, setQuoteInputs] = useState<Record<string, string>>({})
+  const [quoteErrors, setQuoteErrors] = useState<Record<string, string>>({})
   const [actionBusyId, setActionBusyId] = useState<string | null>(null)
   const [codeInputs, setCodeInputs] = useState<Record<string, string>>({})
   const [codeErrors, setCodeErrors] = useState<Record<string, string>>({})
@@ -146,6 +150,7 @@ export function RiderDashboard({
   }, [user.id])
 
   const refreshJobs = useCallback(async () => {
+    await expireStaleQuotes()
     const [available, mine] = await Promise.all([
       fetchRiderRequests(),
       fetchRiderJobs(user.id),
@@ -243,15 +248,27 @@ export function RiderDashboard({
     notify('Clocked out.')
   }
 
-  const handleAccept = async (order: CustomerOrder) => {
-    setAcceptBusyId(order.id)
-    const error = await acceptRiderRequest(order.id)
-    setAcceptBusyId(null)
-    if (error) {
-      notify(error, 'error')
+  const handleQuote = async (order: CustomerOrder) => {
+    const raw = quoteInputs[order.id] ?? ''
+    const fee = Math.floor(Number(raw))
+    if (!raw || !Number.isFinite(fee) || fee <= 0) {
+      setQuoteErrors((current) => ({
+        ...current,
+        [order.id]: 'Enter the delivery fee in naira.',
+      }))
       return
     }
-    notify(`Order ${order.orderNumber} accepted — head to pickup.`)
+    setQuoteBusyId(order.id)
+    const error = await riderQuotePrice(order.id, fee)
+    setQuoteBusyId(null)
+    if (error) {
+      setQuoteErrors((current) => ({ ...current, [order.id]: error }))
+      void refreshJobs()
+      return
+    }
+    notify(
+      `Quote of ₦${fee.toLocaleString()} sent — the customer has ${QUOTE_HOLD_MINUTES} minutes to answer.`,
+    )
     void refreshJobs()
   }
 
@@ -814,22 +831,125 @@ export function RiderDashboard({
                         <span>{order.deliveryAddress?.line1}</span>
                       </div>
                     </div>
-                    {order.kind === 'rider_only' && (
-                      <div className="delivery-card__meta">
-                        <span className="meta-item">
-                          Fee {formatNgn(order.deliveryFeeNaira)}
-                        </span>
+
+                    {order.status === 'rider_requested' && (
+                      <div className="confirm-box">
+                        <span className="label">Quote a price</span>
+                        <p>
+                          Enter the delivery fee in naira. The customer gets
+                          your quote and decides.
+                        </p>
+                        <div className="confirm-box__row">
+                          <input
+                            className="input"
+                            inputMode="numeric"
+                            placeholder="Delivery fee (₦)"
+                            value={quoteInputs[order.id] ?? ''}
+                            onChange={(event) => {
+                              const value = event.target.value.replace(
+                                /[^\d]/g,
+                                '',
+                              )
+                              setQuoteInputs((current) => ({
+                                ...current,
+                                [order.id]: value,
+                              }))
+                              setQuoteErrors((current) => {
+                                const next = { ...current }
+                                delete next[order.id]
+                                return next
+                              })
+                            }}
+                          />
+                          <button
+                            type="button"
+                            className="btn btn--primary btn--sm"
+                            disabled={quoteBusyId === order.id}
+                            onClick={() => handleQuote(order)}
+                          >
+                            <IconTruck size={15} />
+                            {quoteBusyId === order.id
+                              ? 'Sending…'
+                              : 'Quote a price'}
+                          </button>
+                        </div>
+                        {quoteErrors[order.id] && (
+                          <p className="field-error">{quoteErrors[order.id]}</p>
+                        )}
                       </div>
                     )}
-                    <button
-                      type="button"
-                      className="btn btn--primary btn--sm"
-                      disabled={acceptBusyId === order.id}
-                      onClick={() => handleAccept(order)}
-                    >
-                      <IconTruck size={15} />
-                      {acceptBusyId === order.id ? 'Accepting…' : 'Accept job'}
-                    </button>
+
+                    {order.status === 'rider_quoted' &&
+                      order.quoteRiderUserId === user.id && (
+                        <div className="confirm-box confirm-box--quote">
+                          <span className="label">Your quote</span>
+                          <p className="quote-fee">
+                            {formatNgn(order.quotedFeeNaira ?? 0)} — waiting
+                            for the customer.
+                          </p>
+                          <p className="meta-item meta-item--pending">
+                            <IconClock size={14} />{' '}
+                            {order.quoteExpiresAt
+                              ? `${Math.max(
+                                  0,
+                                  Math.ceil(
+                                    (new Date(order.quoteExpiresAt).getTime() -
+                                      Date.now()) /
+                                      60000,
+                                  ),
+                                )} of ${QUOTE_HOLD_MINUTES} minute(s) left`
+                              : 'Waiting for the customer'}{' '}
+                            — you can update your quote.
+                          </p>
+                          <div className="confirm-box__row">
+                            <input
+                              className="input"
+                              inputMode="numeric"
+                              placeholder="New fee (₦)"
+                              value={quoteInputs[order.id] ?? ''}
+                              onChange={(event) => {
+                                const value = event.target.value.replace(
+                                  /[^\d]/g,
+                                  '',
+                                )
+                                setQuoteInputs((current) => ({
+                                  ...current,
+                                  [order.id]: value,
+                                }))
+                                setQuoteErrors((current) => {
+                                  const next = { ...current }
+                                  delete next[order.id]
+                                  return next
+                                })
+                              }}
+                            />
+                            <button
+                              type="button"
+                              className="btn btn--ghost btn--sm"
+                              disabled={quoteBusyId === order.id}
+                              onClick={() => handleQuote(order)}
+                            >
+                              <IconTruck size={15} />
+                              Update quote
+                            </button>
+                          </div>
+                          {quoteErrors[order.id] && (
+                            <p className="field-error">
+                              {quoteErrors[order.id]}
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                    {order.status === 'rider_quoted' &&
+                      order.quoteRiderUserId !== user.id && (
+                        <div className="confirm-box">
+                          <p className="meta-item meta-item--pending">
+                            <IconClock size={14} /> Held by another rider — you
+                            can quote when the hold ends.
+                          </p>
+                        </div>
+                      )}
                   </div>
                 ))}
               </div>

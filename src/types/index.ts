@@ -130,6 +130,9 @@ export interface CustomerOrder {
   waitingDeadline: string | null
   declineReason: string | null
   failureReason: string | null
+  quotedFeeNaira: number | null
+  quoteRiderUserId: string | null
+  quoteExpiresAt: string | null
   createdAt: string
   updatedAt: string
   items: CustomerOrderItem[]
@@ -199,6 +202,9 @@ export interface OrderProgress {
   prepMinutes: number | null
   declineReason: string | null
   failureReason: string | null
+  quotedFeeNaira: number | null
+  quoteRiderUserId: string | null
+  quoteExpiresAt: string | null
 }
 
 export interface OrderEvent {
@@ -245,6 +251,7 @@ export type OrderStatus =
   | 'accepted_by_business'
   | 'ready_for_pickup'
   | 'rider_requested'
+  | 'rider_quoted'
   | 'rider_accepted'
   | 'arrived_at_pickup'
   | 'pickup_verified'

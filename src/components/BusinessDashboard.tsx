@@ -31,6 +31,7 @@ import {
   fetchOrderEvents,
   getPickupCode,
   getRiderIdentity,
+  subscribeBusinessOrders,
   type OrderReview,
 } from '../services/orders'
 import {
@@ -132,19 +133,23 @@ export function BusinessDashboard({
 
   const handleAcceptOrder = async (order: OrderReview) => {
     const raw = prepInputs[order.id] ?? ''
-    const minutes = raw === '' ? undefined : Number(raw)
-    if (raw !== '' && (!Number.isFinite(minutes) || (minutes as number) < 0)) {
-      notify('Enter a valid preparation time in minutes.', 'error')
+    const minutes = Number(raw)
+    if (!raw || !Number.isFinite(minutes) || minutes <= 0 || minutes > 1440) {
+      notify('Choose a preparation time before accepting the order.', 'error')
       return
     }
     setAcceptBusyId(order.id)
-    const error = await businessAcceptOrder(order.id, minutes)
+    const error = await businessAcceptOrder(order.id, Math.round(minutes))
     setAcceptBusyId(null)
     if (error) {
-      notify(error, 'error')
+      if (error.includes('PREP_TIME_REQUIRED')) {
+        notify('Choose a preparation time before accepting the order.', 'error')
+      } else {
+        notify(error, 'error')
+      }
       return
     }
-    notify('Order accepted.')
+    notify('Order accepted — the customer is notified.')
     await refreshOrders()
   }
 
@@ -228,8 +233,10 @@ export function BusinessDashboard({
   }, [user.id])
 
   const refreshOrders = useCallback(async () => {
-    setOrders(await fetchBusinessOrders(user.id))
-  }, [user.id])
+    const result = await fetchBusinessOrders()
+    setOrders(result.orders)
+    setOrdersError(result.error)
+  }, [])
 
   const refreshProfile = useCallback(async () => {
     const next = await fetchBusinessProfile(user.id)
@@ -243,14 +250,16 @@ export function BusinessDashboard({
 
   useEffect(() => {
     let active = true
-    fetchBusinessOrders(user.id)
-      .then((list) => {
+    fetchBusinessOrders()
+      .then((result) => {
         if (!active) return
-        setOrders(list)
+        setOrders(result.orders)
+        setOrdersError(result.error)
         setOrdersLoading(false)
       })
-      .catch(() => {
+      .catch((cause) => {
         if (!active) return
+        console.error('[business] could not load orders:', cause)
         setOrdersError('Could not load your orders.')
         setOrdersLoading(false)
       })
@@ -290,6 +299,10 @@ export function BusinessDashboard({
       )
       void refreshOrders()
     })
+  }, [user.id, refreshOrders])
+
+  useEffect(() => {
+    return subscribeBusinessOrders(user.id, () => void refreshOrders())
   }, [user.id, refreshOrders])
 
   useEffect(() => {
@@ -685,12 +698,39 @@ export function BusinessDashboard({
                       order.status === 'rider_requested' ||
                       order.status === 'rider_accepted') && (
                       <div className="confirm-box">
-                        <span className="label">Accept order</span>
+                        <span className="label">
+                          Accept order — choose a preparation time
+                        </span>
+                        <p className="meta-item">
+                          The customer can only request a rider after you
+                          accept with a preparation time.
+                        </p>
+                        <div className="prep-chips">
+                          {[15, 30, 45, 60].map((minutes) => (
+                            <button
+                              key={minutes}
+                              type="button"
+                              className={`chip-btn ${
+                                prepInputs[order.id] === String(minutes)
+                                  ? 'chip-btn--active'
+                                  : ''
+                              }`}
+                              onClick={() =>
+                                setPrepInputs((current) => ({
+                                  ...current,
+                                  [order.id]: String(minutes),
+                                }))
+                              }
+                            >
+                              {minutes} min
+                            </button>
+                          ))}
+                        </div>
                         <div className="confirm-box__row">
                           <input
                             className="input"
                             inputMode="numeric"
-                            placeholder="Prep time (minutes, optional)"
+                            placeholder="Custom minutes"
                             value={prepInputs[order.id] ?? ''}
                             onChange={(event) =>
                               setPrepInputs((current) => ({

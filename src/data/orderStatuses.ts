@@ -23,6 +23,7 @@ export const ORDER_STATUSES: OrderStatus[] = [
   'accepted_by_business',
   'ready_for_pickup',
   'rider_requested',
+  'rider_quoted',
   'rider_accepted',
   'arrived_at_pickup',
   'pickup_verified',
@@ -111,6 +112,11 @@ export const ORDER_STATUS_META: Record<OrderStatus, OrderStatusMeta> = {
     badge: 'badge-pending',
     color: 'var(--status-pending)',
   },
+  rider_quoted: {
+    label: 'Rider quoted',
+    badge: 'badge-pending',
+    color: 'var(--status-pending)',
+  },
   rider_accepted: {
     label: 'Rider accepted',
     badge: 'badge-assigned',
@@ -143,6 +149,7 @@ export const ORDER_FLOW_STEPS: { status: OrderStatus; label: string }[] = [
   { status: 'accepted_by_business', label: 'Business accepted' },
   { status: 'ready_for_pickup', label: 'Ready for pickup' },
   { status: 'rider_requested', label: 'Rider requested' },
+  { status: 'rider_quoted', label: 'Rider quoted' },
   { status: 'rider_accepted', label: 'Rider accepted' },
   { status: 'arrived_at_pickup', label: 'At pickup' },
   { status: 'pickup_verified', label: 'Pickup verified' },

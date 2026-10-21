@@ -6,7 +6,7 @@ import type {
   UserRole,
 } from '../types'
 import type { ThemeMode } from '../utils/storage'
-import { fetchCustomerOrders } from '../services/orders'
+import { fetchCustomerOrders, expireStaleQuotes, subscribeCustomerOrders } from '../services/orders'
 import { fetchBusinesses } from '../services/business'
 import { subscribeNotifications } from '../services/notifications'
 import { CustomerOrdersSection } from './CustomerOrdersSection'
@@ -58,19 +58,23 @@ export function CustomerDashboard({
   }, [notify])
 
   const refreshOrders = useCallback(async () => {
-    setOrders(await fetchCustomerOrders(user.id))
-  }, [user.id])
+    const result = await fetchCustomerOrders()
+    setOrders(result.orders)
+    setOrdersError(result.error)
+  }, [])
 
   useEffect(() => {
     let active = true
-    fetchCustomerOrders(user.id)
-      .then((list) => {
+    fetchCustomerOrders()
+      .then((result) => {
         if (!active) return
-        setOrders(list)
+        setOrders(result.orders)
+        setOrdersError(result.error)
         setOrdersLoading(false)
       })
-      .catch(() => {
+      .catch((cause) => {
         if (!active) return
+        console.error('[customer] could not load orders:', cause)
         setOrdersError('Could not load your orders.')
         setOrdersLoading(false)
       })
@@ -95,6 +99,17 @@ export function CustomerDashboard({
       void refreshOrders()
     })
   }, [user.id, refreshOrders])
+
+  useEffect(() => {
+    return subscribeCustomerOrders(user.id, () => void refreshOrders())
+  }, [user.id, refreshOrders])
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      void expireStaleQuotes().then(() => refreshOrders())
+    }, 30000)
+    return () => clearInterval(id)
+  }, [refreshOrders])
 
   const selectedBusiness =
     businesses.find((business) => business.userId === businessId) ?? null
@@ -219,22 +234,15 @@ export function CustomerDashboard({
         )}
 
         {linkedOrderId != null && mode === 'business' && (
-          <div className="banner banner--success">
+            <div className="banner banner--success">
             <IconTruck size={20} className="banner__icon" />
             <div className="banner__body">
-              <strong>Next step: order a rider for this order</strong>
+              <strong>Order placed — waiting for the business</strong>
               <p>
-                Your order is placed. A rider will bring it from the business
-                to your door.
+                The business must accept your order and give a preparation
+                time. Once they do, the <strong>Request a rider</strong> button
+                unlocks under My orders.
               </p>
-              <button
-                type="button"
-                className="btn btn--primary btn--sm"
-                onClick={() => setMode('rider')}
-              >
-                <IconTruck size={15} />
-                Order a rider now
-              </button>
             </div>
           </div>
         )}

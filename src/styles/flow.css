@@ -231,6 +231,64 @@
   color: #64748b;
 }
 
+.rider-identity__phone {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1d4ed8;
+  text-decoration: none;
+}
+
+.rider-identity__phone:hover {
+  text-decoration: underline;
+}
+
+/* ---------- Customer quote card ---------- */
+.confirm-box--quote {
+  border: 1px solid rgba(29, 78, 216, 0.3);
+  background: #f5f9ff;
+}
+
+.quote-fee {
+  font-size: 15px;
+  color: #0b1b3f;
+}
+
+.quote-fee strong {
+  font-size: 17px;
+  color: #1d4ed8;
+}
+
+.prep-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 4px 0 10px;
+}
+
+.prep-chips .chip-btn {
+  padding: 6px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #0b1b3f;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.prep-chips .chip-btn:hover {
+  border-color: #1d4ed8;
+}
+
+.prep-chips .chip-btn--active {
+  border-color: #1d4ed8;
+  background: #1d4ed8;
+  color: #ffffff;
+}
+
 /* ---------- Business details card ---------- */
 .details-card {
   padding: 20px;

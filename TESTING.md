@@ -1,12 +1,20 @@
-# AZ Delivery — Testing the full order flow (v2)
+# AZ Delivery — Testing the full order flow (v3)
 
 Run this with THREE separate browser profiles (or incognito windows): a
 **business** account, a **customer** account and a **rider** account. Register
 each via the sign-in modal (Customer / Rider / Business tab).
 
-Before starting, run `supabase/migrations/0018_order_flow_upgrades.sql` in the
-Supabase SQL editor (after 0015/0017 if not already applied — everything is
-idempotent). It ends with `notify pgrst, 'reload schema';`.
+Before starting, run the migrations in the Supabase SQL editor IN THIS ORDER
+(everything is idempotent and nothing deletes data):
+
+1. `supabase/migrations/0019_quote_statuses.sql` — adds the new status enum
+   values ONLY (each migration file runs in ONE transaction, so enum values
+   must live in a file that runs before the code that uses them).
+2. `supabase/migrations/0020_quote_flow_and_order_lists.sql` — everything
+   else. It ends with `notify pgrst, 'reload schema';`.
+
+(If not already applied, run 0015, 0017 and 0018 first — they are also
+idempotent.)
 
 ## 1. Business setup (unchanged)
 
@@ -14,82 +22,108 @@ idempotent). It ends with `notify pgrst, 'reload schema';`.
    with up to 4 photos. The Add product button stays disabled until address
    and phone are saved.
 
-## 2. Order + business accept/ready
+## 2. Customer orders food; both sides see it
 
 1. Customer: choose "Order from a business", select the business, add items,
-   checkout (no delivery fee on the shop bill). The order shows **Placed**
-   and the timeline starts.
-2. Customer page shows **"Waiting for you to request a rider"** with a
-   prominent **Request a rider** button.
-3. Business page shows the new order with **"Customer has not requested a
-   rider yet"**, plus **Accept order** (enter an optional prep time in
-   minutes) and **Decline order** (asks for a reason → customer is notified
-   and the order is cancelled).
-4. Business accepts → status **accepted_by_business** → **Order ready for
-   pickup** → status **ready_for_pickup**; rider and customer are notified.
-5. Customer taps **Request a rider** → status **rider_requested**.
+   checkout. There is NO delivery fee anywhere on the customer's bill.
+2. The order shows **Placed** under **My orders** with its timeline, the cart
+   clears, and the business gets a realtime notification AND a new row in
+   **New orders** with the customer's name, phone, items and total.
+3. Business declines → reason prompt → the customer is notified and the order
+   shows **Cancelled**. (Test this once with a second order.)
 
-## 3. Business marks ready gates the rider
+## 3. Business accepts with a preparation time (prep gate)
 
-1. Rider (clocked in): accept the request — this works even while the
-   business is preparing.
-2. The rider's **"I've arrived at pickup"** button is DISABLED with
-   **"The business is still preparing the order"**.
-3. Business taps **Order ready for pickup**. The rider's button enables and
-   the full pickup-code + "Confirm this is the rider" flow works as before
-   (codes stay mandatory; no skip).
+1. Business: in **New orders**, the order shows **Accept order** and
+   **Decline**. The accept box has quick prep-time options 15 / 30 / 45 / 60
+   minutes plus a custom field — accepting WITHOUT choosing a time is
+   rejected.
+2. Business accepts with **30 minutes** → the customer gets
+   "{Business} will have your food ready in 30 minutes" and sees a prep
+   countdown on the order card.
+3. While the order is still **Placed** (not accepted), the customer's
+   **Request a rider** button is DISABLED with the text
+   "Waiting for the business to confirm and give a preparation time".
+   After the accept it unlocks (status **accepted_by_business**).
+4. Customer taps **Request a rider** → fills pickup address + pickup phone
+   (prefilled from the business profile — the "Pickup phone is required"
+   error must NOT appear when it is filled), delivery address + phone, item
+   description. Status becomes **rider_requested**. There is no delivery-fee
+   field on this form.
 
-## 4. Customer not reachable at pickup
+## 4. Rider quotes the price
 
-1. At the business, the rider taps "I've arrived at pickup" and waits.
-2. After 5 minutes the rider can tap **"Customer not reachable"** — customer
-   and business are notified, and everyone sees a countdown.
-3. Business chooses **Keep waiting (+5 min)** (countdown extends) or
-   **Cancel order** (reason prompt → rider released, customer notified).
-4. The pickup code and business confirm remain REQUIRED — the only ways out
-   are the code flow or the cancel fallback.
+1. Rider (clocked in): the request appears in **Available requests** with
+   BOTH addresses and the item description — and NO price anywhere.
+2. Rider taps **Quote a price**, enters the fee in naira, sends it. The
+   request is now held for that rider (status **rider_quoted**).
+3. A second rider sees the request as "Held by another rider" and cannot
+   quote while the hold is active (SQL raises HELD_BY_ANOTHER_RIDER).
+4. The customer gets a notification and a prominent card: rider name,
+   vehicle, plate, the quoted price, the rider's phone number (tappable) and
+   **Accept** / **Decline** buttons with a 5-minute countdown
+   (`QUOTE_HOLD_MINUTES` in `src/data/flowConstants.ts`, mirrored by the SQL
+   constant in migration 0020).
+5. Customer taps **Accept** → status **rider_accepted**, the rider is
+   assigned, the fee is stored on the order (quoted_fee_naira and
+   delivery_fee_naira/total), and the rider gets the job in **My jobs**.
 
-## 5. No rider accepts (timeout)
+## 5. Quote fallbacks
 
-1. Create a rider request, but have the rider stay clocked out.
-2. After 10 minutes (constant `NO_RIDER_TIMEOUT_MINUTES` in
-   `src/data/flowConstants.ts`) the customer gets a notification and sees
-   **Keep waiting / Cancel request**. Keep waiting restarts the timer;
-   cancel cancels the order and notifies the business.
-3. Before a rider accepts, the customer can cancel any time; after a rider
-   accepts, cancel is allowed only until pickup is verified.
+1. **Customer declines**: tap **Decline** → the hold is released, the request
+   returns to **rider_requested**, the rider is notified "Quote declined".
+2. **Quote timeout**: let a quote sit unanswered for 5 minutes → the app
+   releases it (expire_stale_quotes), the request returns to the pool, the
+   rider gets "Your quote expired", the customer gets "Quote expired".
+3. **Rider-only request** (no business): customer uses "Just order a rider" —
+   no delivery-fee input; riders quote it exactly like a shop order; the
+   business accept/prep step is skipped entirely.
 
-## 6. Customer not responding at the destination
+## 6. Pickup + delivery codes (GOLDEN RULE — unchanged)
 
-1. Rider: "I've arrived at destination" → the customer sees the delivery
-   code (big) and a notification; the rider never sees the code.
-2. After 5 minutes the rider taps **"Customer not responding"** — customer
-   and business are notified and a countdown shows.
-3. After 15 minutes in total the rider taps **"Report failed delivery"** with
-   a reason → status **delivery_failed**, the order is returned to the
-   business, and business + customer are notified.
-4. The delivery code can never be bypassed — a failed delivery is the only
-   way out without the correct code.
+1. Business: for a shop order, tap **Order ready for pickup** → status
+   **ready_for_pickup**; until then the rider's **"I've arrived at pickup"**
+   stays disabled ("The business is still preparing the order").
+2. Rider arrives at pickup → the BUSINESS sees the 6-digit **pickup code**
+   (only the business, via get_pickup_code). The business calls the customer
+   with the code; the customer tells the rider; the rider verifies it; the
+   business confirms the rider. The rider NEVER sees the pickup code.
+3. Rider picks up → arrives at destination → the CUSTOMER sees the 6-digit
+   **delivery code** (only the customer, via get_delivery_code). The rider
+   never sees it. Codes stay MANDATORY — there is no skip path anywhere.
+4. Customer taps **I have received my order** → status **delivered**.
 
-## 7. Reminders + order history
+## 7. Not reachable / not responding / no rider (unchanged)
 
-1. If the customer never requests a rider, reminders arrive after 5 and 15
-   minutes.
-2. Every order shows **Order history** (order_events) for the customer,
-   business and rider: status changes, code attempts (success/failure —
-   never the code itself), timeouts, cancellations and reports.
+- Pickup: 5-minute wait, then "Customer not reachable" → business keeps
+  waiting (+5 min) or cancels (rider released, customer notified).
+- Destination: 5-minute wait for "Customer not responding", 15 minutes total
+  before "Report failed delivery" → status **delivery_failed**, order
+  returned to the business.
+- `NO_RIDER_TIMEOUT_MINUTES` (10): the customer gets "No rider accepted yet"
+  with Keep waiting / Cancel request.
 
 ## 8. Isolation + security checks
 
-- Every state change goes through SECURITY DEFINER functions with role
-  checks; invalid transitions return clear errors (e.g. accept twice, mark
-  ready before accepting, cancel after pickup, arrive before ready).
-- The pickup code is readable ONLY by the business, the delivery code ONLY
-  by the customer, via `get_pickup_code`/`get_delivery_code`; `order_codes`
-  columns are revoked from everyone.
-- Each account only sees its own orders, jobs and notifications.
+- The business list and the customer list load through SECURITY DEFINER
+  functions (get_business_orders / get_customer_orders) — a failed load
+  shows the REAL error on the page, never a silent empty list.
+- A business sees only its own orders + items + the name/phone of its own
+  customers. A customer sees only their own orders. A rider sees only open
+  requests (addresses, no customer contact info, no price) and their own
+  jobs. The quote card is only visible to the customer of that order.
+- Every transition runs through SECURITY DEFINER functions with role checks
+  (rider_quote_price, customer_accept_quote, customer_decline_quote,
+  business_accept_order, business_mark_ready, …). Invalid transitions return
+  clear errors.
+- orders and order_items are in the supabase_realtime publication; the
+  business and customer pages refetch live on insert/update, and everyone
+  still gets realtime notifications.
+- The pickup code is readable ONLY by the business; the delivery code ONLY
+  by the customer; the rider sees neither.
 
-Expected: the business gates pickup with accept/ready, the rider cannot
-arrive early, the customer drives the rider request and its timers, the
-not-reachable / not-responding fallbacks work with countdowns, codes can
-never be skipped, and every person only sees their own data.
+Expected: the customer orders food, the order shows in both dashboards
+instantly, the business accepts with a prep time, the Request-a-rider button
+unlocks, a rider quotes a price, the customer accepts, the prep gate controls
+the rider's arrival, the pickup and delivery codes work end to end, and every
+person only sees their own data.

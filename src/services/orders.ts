@@ -12,7 +12,6 @@ import type {
   ShopItem,
 } from '../types'
 import { mapImage, mapItem } from './items'
-import { fetchCompanies } from './company'
 
 export const MAX_SLIP_BYTES = 5 * 1024 * 1024
 const ALLOWED_SLIP_TYPES = [
@@ -147,6 +146,9 @@ function mapOrderRow(
     waitingDeadline: row.waiting_deadline as string | null,
     declineReason: row.decline_reason as string | null,
     failureReason: row.failure_reason as string | null,
+    quotedFeeNaira: row.quoted_fee_naira as number | null,
+    quoteRiderUserId: row.quote_rider_user_id as string | null,
+    quoteExpiresAt: row.quote_expires_at as string | null,
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
     items,
@@ -158,10 +160,18 @@ function mapOrderRow(
   }
 }
 
-export async function fetchCustomerOrders(
-  customerUserId: string,
-): Promise<CustomerOrder[]> {
-  return fetchOrdersWithDetails('customer_user_id', customerUserId)
+export async function fetchCustomerOrders(): Promise<{
+  orders: CustomerOrder[]
+  error: string | null
+}> {
+  const supabase = requireSupabase()
+  const { data, error } = await supabase.rpc('get_customer_orders')
+  if (error) {
+    console.error('[orders] get_customer_orders failed:', error.message)
+    return { orders: [], error: mapOrderError(error.message) }
+  }
+  const rows = Array.isArray(data) ? (data as RpcOrderRow[]) : []
+  return { orders: rows.map(mapRpcOrderRow), error: null }
 }
 
 export interface OrderReview extends CustomerOrder {
@@ -169,62 +179,84 @@ export interface OrderReview extends CustomerOrder {
   customerPhone: string | null
 }
 
-async function fetchOrdersWithDetails(
-  column: 'customer_user_id' | 'company_id' | 'business_user_id',
-  value: string,
-): Promise<OrderReview[]> {
-  const supabase = requireSupabase()
-  const { data, error } = await supabase
-    .from('orders')
-    .select('*, order_items(*), payments(*), deliveries(*)')
-    .eq(column, value)
-    .order('created_at', { ascending: false })
-  if (error || !data) return []
-  const companies = await fetchCompanies()
-  const companyById = new Map(companies.map((company) => [company.id, company]))
-  const slipPaths = data
-    .flatMap((row) => row.payments as Record<string, unknown>[])
-    .map((payment) => payment.slip_path as string)
-    .filter((path): path is string => Boolean(path))
-  const slipUrls = new Map<string, string>()
-  for (const path of slipPaths) {
-    const { data: signed } = await supabase.storage
-      .from('payment-slips')
-      .createSignedUrl(path, 3600)
-    if (signed) slipUrls.set(path, signed.signedUrl)
-  }
-  const customerIds = [
-    ...new Set(data.map((row) => row.customer_user_id as string)),
-  ]
-  const nameById = new Map<string, string>()
-  const phoneById = new Map<string, string | null>()
-  if (customerIds.length > 0) {
-    const { data: profiles } = await supabase
-      .from('profiles')
-      .select('id, full_name, phone')
-      .in('id', customerIds)
-    if (profiles) {
-      for (const row of profiles as {
-        id: string
-        full_name: string
-        phone: string | null
-      }[]) {
-        nameById.set(row.id, row.full_name)
-        phoneById.set(row.id, row.phone)
+type RpcOrderRow = Record<string, unknown>
+
+function mapRpcOrderRow(row: RpcOrderRow): CustomerOrder {
+  const items = ((row.items ?? []) as RpcOrderRow[]).map(
+    (itemRow): CustomerOrderItem => ({
+      id: itemRow.id as string,
+      orderId: itemRow.order_id as string,
+      itemId: itemRow.item_id as string | null,
+      itemName: itemRow.item_name as string,
+      unitPriceNaira: itemRow.unit_price_naira as number,
+      quantity: itemRow.quantity as number,
+      createdAt: itemRow.created_at as string,
+    }),
+  )
+  const deliveryRow = (row.delivery ?? null) as RpcOrderRow | null
+  const delivery: CustomerDeliveryState | null = deliveryRow
+    ? {
+        id: deliveryRow.id as string,
+        status: deliveryRow.status as CustomerDeliveryState['status'],
+        failedAttempts: (deliveryRow.failed_attempts as number) ?? 0,
       }
-    }
+    : null
+  return {
+    id: row.id as string,
+    orderNumber: row.order_number as string,
+    customerUserId: row.customer_user_id as string,
+    companyId: row.company_id as string | null,
+    businessUserId: row.business_user_id as string | null,
+    kind: row.kind as 'shop' | 'rider_only',
+    status: row.status as OrderStatus,
+    itemTotalNaira: row.item_total_naira as number,
+    deliveryFeeNaira: row.delivery_fee_naira as number,
+    totalNaira: row.total_naira as number,
+    itemDescription: row.item_description as string | null,
+    pickupAddress: row.pickup_address as Address | null,
+    pickupPhone: row.pickup_phone as string | null,
+    deliveryAddress: row.delivery_address as Address | null,
+    recipientName: row.recipient_name as string | null,
+    recipientPhone: row.recipient_phone as string | null,
+    linkedOrderId: row.linked_order_id as string | null,
+    prepMinutes: row.prep_minutes as number | null,
+    businessAcceptedAt: row.business_accepted_at as string | null,
+    readyAt: row.ready_at as string | null,
+    riderRequestedAt: row.rider_requested_at as string | null,
+    waitingDeadline: row.waiting_deadline as string | null,
+    declineReason: row.decline_reason as string | null,
+    failureReason: row.failure_reason as string | null,
+    quotedFeeNaira: row.quoted_fee_naira as number | null,
+    quoteRiderUserId: row.quote_rider_user_id as string | null,
+    quoteExpiresAt: row.quote_expires_at as string | null,
+    createdAt: row.created_at as string,
+    updatedAt: row.updated_at as string,
+    items,
+    payment: null,
+    delivery,
+    company: null,
   }
-  return data.map((row) => ({
-    ...mapOrderRow(row, companyById, slipUrls),
-    customerName: nameById.get(row.customer_user_id as string) ?? 'Customer',
-    customerPhone: phoneById.get(row.customer_user_id as string) ?? null,
-  }))
 }
 
-export async function fetchBusinessOrders(
-  businessUserId: string,
-): Promise<OrderReview[]> {
-  return fetchOrdersWithDetails('business_user_id', businessUserId)
+export async function fetchBusinessOrders(): Promise<{
+  orders: OrderReview[]
+  error: string | null
+}> {
+  const supabase = requireSupabase()
+  const { data, error } = await supabase.rpc('get_business_orders')
+  if (error) {
+    console.error('[orders] get_business_orders failed:', error.message)
+    return { orders: [], error: mapOrderError(error.message) }
+  }
+  const rows = Array.isArray(data) ? (data as RpcOrderRow[]) : []
+  return {
+    orders: rows.map((row) => ({
+      ...mapRpcOrderRow(row),
+      customerName: (row.customer_name as string) ?? 'Customer',
+      customerPhone: (row.customer_phone as string | null) ?? null,
+    })),
+    error: null,
+  }
 }
 
 export async function placeShopOrder(input: {
@@ -265,7 +297,6 @@ export async function placeRiderOrder(input: {
   dropOff: Address
   deliveryPhone: string
   itemDescription: string
-  deliveryFee: number
   recipientName: string
 }): Promise<{ error?: string }> {
   const { error } = await requireSupabase().rpc('place_rider_order', {
@@ -274,7 +305,6 @@ export async function placeRiderOrder(input: {
     p_delivery_address: input.dropOff,
     p_delivery_phone: input.deliveryPhone,
     p_item_description: input.itemDescription,
-    p_delivery_fee: input.deliveryFee,
     p_recipient_name: input.recipientName,
   })
   if (error) return { error: mapRiderOrderError(error.message) }
@@ -284,7 +314,6 @@ export async function placeRiderOrder(input: {
 function mapRiderOrderError(message: string): string {
   if (message.includes('NOT_AUTHENTICATED')) return 'You must be signed in to continue.'
   if (message.includes('DESCRIPTION_REQUIRED')) return 'Describe the item you are sending.'
-  if (message.includes('INVALID_FEE')) return 'Enter a valid delivery fee.'
   if (message.includes('PICKUP_ADDRESS_REQUIRED')) return 'Pickup address is required.'
   if (message.includes('PICKUP_PHONE_REQUIRED')) return 'Pickup phone is required.'
   if (message.includes('RECIPIENT_PHONE_REQUIRED')) return 'Delivery phone is required.'
@@ -308,7 +337,11 @@ export async function requestRiderForOrder(input: {
     p_delivery_phone: input.deliveryPhone,
     p_item_description: input.itemDescription,
   })
-  return error ? error.message : null
+  if (!error) return null
+  if (error.message.includes('BUSINESS_NOT_READY')) {
+    return 'Wait for the business to accept the order and give a preparation time.'
+  }
+  return error.message
 }
 
 export async function acceptRiderRequest(orderId: string): Promise<string | null> {
@@ -325,6 +358,69 @@ export async function acceptRiderRequest(orderId: string): Promise<string | null
     return error.message
   }
   return null
+}
+
+export async function riderQuotePrice(
+  orderId: string,
+  feeNaira: number,
+): Promise<string | null> {
+  const { error } = await requireSupabase().rpc('rider_quote_price', {
+    p_order_id: orderId,
+    p_fee_naira: feeNaira,
+  })
+  if (!error) return null
+  if (error.message.includes('NOT_CLOCKED_IN')) return 'Clock in to quote a price.'
+  if (error.message.includes('HELD_BY_ANOTHER_RIDER')) {
+    return 'Another rider already holds this request. Try again when their quote expires.'
+  }
+  if (error.message.includes('INVALID_FEE')) return 'Enter the delivery fee in naira.'
+  if (error.message.includes('ORDER_NOT_QUOTABLE')) {
+    return 'This request is no longer open for quotes.'
+  }
+  return error.message
+}
+
+export async function customerAcceptQuote(
+  orderId: string,
+): Promise<string | null> {
+  const { error } = await requireSupabase().rpc('customer_accept_quote', {
+    p_order_id: orderId,
+  })
+  if (!error) return null
+  if (error.message.includes('QUOTE_EXPIRED')) {
+    return 'This quote expired — wait for a new one.'
+  }
+  if (error.message.includes('RIDER_UNAVAILABLE')) {
+    return 'This rider can no longer take the job. Wait for a new quote.'
+  }
+  return error.message
+}
+
+export async function customerDeclineQuote(
+  orderId: string,
+): Promise<string | null> {
+  const { error } = await requireSupabase().rpc('customer_decline_quote', {
+    p_order_id: orderId,
+  })
+  return error ? error.message : null
+}
+
+export async function expireStaleQuotes(): Promise<void> {
+  const { error } = await requireSupabase().rpc('expire_stale_quotes')
+  if (error) {
+    console.error('[orders] expire_stale_quotes failed:', error.message)
+  }
+}
+
+export async function getQuoteRiderIdentity(
+  orderId: string,
+): Promise<RiderIdentity | null> {
+  const { data, error } = await requireSupabase().rpc(
+    'get_quote_rider_identity',
+    { p_order_id: orderId },
+  )
+  if (error || !data) return null
+  return data as RiderIdentity
 }
 
 export async function riderArrivedPickup(orderId: string): Promise<string | null> {
@@ -556,7 +652,7 @@ export async function fetchRiderRequests(): Promise<CustomerOrder[]> {
   const { data, error } = await supabase
     .from('orders')
     .select('*, order_items(*), payments(*), deliveries(*)')
-    .eq('status', 'rider_requested')
+    .in('status', ['rider_requested', 'rider_quoted'])
     .order('created_at', { ascending: true })
   if (error || !data) return []
   return data.map((row) => mapOrderRow(row, new Map(), new Map()))
@@ -582,4 +678,81 @@ export async function fetchRiderJobs(
     .order('created_at', { ascending: false })
   if (orderError || !data) return []
   return data.map((row) => mapOrderRow(row, new Map(), new Map()))
+}
+
+// --------------------------------------------------------------
+// Realtime refetch helpers: one shared channel per user id (the
+// app runs under React StrictMode, so a plain channel() call would
+// double-subscribe). The registry below mirrors the notification
+// channel registry in services/notifications.ts.
+// --------------------------------------------------------------
+
+interface ActiveOrderSubscription {
+  channel: ReturnType<ReturnType<typeof requireSupabase>['channel']>
+  listeners: Set<() => void>
+}
+
+const activeOrderSubscriptions = new Map<string, ActiveOrderSubscription>()
+
+function subscribeToOrdersChanges(
+  channelKey: string,
+  filter: string,
+  onChange: () => void,
+): () => void {
+  const supabase = requireSupabase()
+  let entry = activeOrderSubscriptions.get(channelKey)
+  if (!entry) {
+    const channel = supabase
+      .channel(channelKey)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'orders',
+          filter,
+        },
+        () => {
+          for (const listener of activeOrderSubscriptions.get(channelKey)
+            ?.listeners ?? []) {
+            listener()
+          }
+        },
+      )
+      .subscribe()
+    entry = { channel, listeners: new Set() }
+    activeOrderSubscriptions.set(channelKey, entry)
+  }
+  entry.listeners.add(onChange)
+  return () => {
+    const current = activeOrderSubscriptions.get(channelKey)
+    if (!current) return
+    current.listeners.delete(onChange)
+    if (current.listeners.size === 0) {
+      void supabase.removeChannel(current.channel)
+      activeOrderSubscriptions.delete(channelKey)
+    }
+  }
+}
+
+export function subscribeBusinessOrders(
+  businessUserId: string,
+  onChange: () => void,
+): () => void {
+  return subscribeToOrdersChanges(
+    `orders:business:${businessUserId}`,
+    `business_user_id=eq.${businessUserId}`,
+    onChange,
+  )
+}
+
+export function subscribeCustomerOrders(
+  customerUserId: string,
+  onChange: () => void,
+): () => void {
+  return subscribeToOrdersChanges(
+    `orders:customer:${customerUserId}`,
+    `customer_user_id=eq.${customerUserId}`,
+    onChange,
+  )
 }

@@ -1,16 +1,21 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { CustomerOrder, OrderEvent } from '../types'
+import type { CustomerOrder, OrderEvent, RiderIdentity } from '../types'
 import { ORDER_STATUS_META } from '../data/orderStatuses'
 import { EVENT_LABELS, stepStates } from '../data/flowSteps'
 import {
   NO_RIDER_TIMEOUT_MINUTES,
+  QUOTE_HOLD_MINUTES,
   REQUEST_REMINDER_MINUTES,
 } from '../data/flowConstants'
 import {
+  customerAcceptQuote,
   customerCancelRequest,
   customerConfirmReceived,
+  customerDeclineQuote,
+  expireStaleQuotes,
   fetchOrderEvents,
   getDeliveryCode,
+  getQuoteRiderIdentity,
   notifyNoRider,
   sendRequestReminder,
 } from '../services/orders'
@@ -21,6 +26,7 @@ import {
   IconClock,
   IconKey,
   IconPackage,
+  IconPhone,
   IconTruck,
   IconXCircle,
 } from './Icons'
@@ -41,6 +47,7 @@ const CANCELLABLE: CustomerOrder['status'][] = [
   'accepted_by_business',
   'ready_for_pickup',
   'rider_requested',
+  'rider_quoted',
   'rider_accepted',
   'arrived_at_pickup',
   'pickup_verified',
@@ -62,6 +69,10 @@ export function CustomerOrdersSection({
   const [codes, setCodes] = useState<Record<string, string | null>>({})
   const [confirmingId, setConfirmingId] = useState<string | null>(null)
   const [cancellingId, setCancellingId] = useState<string | null>(null)
+  const [quoteBusyId, setQuoteBusyId] = useState<string | null>(null)
+  const [quoteRiders, setQuoteRiders] = useState<
+    Record<string, RiderIdentity | null>
+  >({})
   const [noRiderOptions, setNoRiderOptions] = useState<Set<string>>(new Set())
   const [historyOpen, setHistoryOpen] = useState<Record<string, boolean>>({})
   const [events, setEvents] = useState<Record<string, OrderEvent[]>>({})
@@ -74,6 +85,22 @@ export function CustomerOrdersSection({
     const id = setInterval(() => setTick((value) => value + 1), 15000)
     return () => clearInterval(id)
   }, [])
+
+  useEffect(() => {
+    if (!orders.some((order) => order.status === 'rider_quoted')) return
+    void expireStaleQuotes().then(onRefresh)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tick])
+
+  useEffect(() => {
+    for (const order of orders) {
+      if (order.status === 'rider_quoted' && quoteRiders[order.id] === undefined) {
+        void getQuoteRiderIdentity(order.id).then((identity) =>
+          setQuoteRiders((current) => ({ ...current, [order.id]: identity })),
+        )
+      }
+    }
+  }, [orders, quoteRiders])
 
   useEffect(() => {
     const now = Date.now()
@@ -169,6 +196,49 @@ export function CustomerOrdersSection({
       return next
     })
     notify('Timer restarted — we will check again shortly.')
+  }
+
+  const handleAcceptQuote = async (order: CustomerOrder) => {
+    setQuoteBusyId(order.id)
+    const error = await customerAcceptQuote(order.id)
+    setQuoteBusyId(null)
+    if (error) {
+      notify(error, 'error')
+      onRefresh()
+      return
+    }
+    notify('Quote accepted — the rider is assigned to your order.')
+    onRefresh()
+  }
+
+  const handleDeclineQuote = async (order: CustomerOrder) => {
+    setQuoteBusyId(order.id)
+    const error = await customerDeclineQuote(order.id)
+    setQuoteBusyId(null)
+    if (error) {
+      notify(error, 'error')
+      onRefresh()
+      return
+    }
+    notify('Quote declined — other riders can quote again.')
+    onRefresh()
+  }
+
+  const quoteMinutesLeft = (order: CustomerOrder): number => {
+    if (!order.quoteExpiresAt) return 0
+    return Math.max(
+      0,
+      Math.ceil((new Date(order.quoteExpiresAt).getTime() - Date.now()) / 60000),
+    )
+  }
+
+  const prepMinutesLeft = (order: CustomerOrder): number => {
+    if (!order.businessAcceptedAt || order.readyAt) return 0
+    const readyInMs =
+      new Date(order.businessAcceptedAt).getTime() +
+      (order.prepMinutes ?? 0) * 60000 -
+      Date.now()
+    return Math.max(0, Math.ceil(readyInMs / 60000))
   }
 
   const toggleHistory = async (order: CustomerOrder) => {
@@ -278,22 +348,46 @@ export function CustomerOrdersSection({
                   order.status !== 'delivery_failed' &&
                   renderTimeline(order)}
 
+                {order.kind === 'shop' && order.status === 'placed' && (
+                  <div className="confirm-box">
+                    <span className="label">Waiting for the business</span>
+                    <p>
+                      <IconClock size={14} /> The business must confirm your
+                      order and give a preparation time before you can request
+                      a rider.
+                    </p>
+                    <button
+                      type="button"
+                      className="btn btn--primary"
+                      disabled
+                      title="Waiting for the business to confirm and give a preparation time"
+                    >
+                      <IconTruck size={16} />
+                      Waiting for the business to confirm and give a
+                      preparation time
+                    </button>
+                  </div>
+                )}
+
                 {order.kind === 'shop' &&
-                  (order.status === 'placed' ||
-                    order.status === 'accepted_by_business' ||
+                  (order.status === 'accepted_by_business' ||
                     order.status === 'ready_for_pickup') && (
                     <div className="confirm-box">
-                      <span className="label">
-                        Waiting for you to request a rider
-                      </span>
+                      <span className="label">Request a rider</span>
                       <p>
-                        Your order is placed
-                        {order.businessAcceptedAt
-                          ? ' and the business accepted it'
+                        The business accepted your order
+                        {order.prepMinutes
+                          ? ` and will have your food ready in ${order.prepMinutes} minutes`
                           : ''}
-                        {order.readyAt ? ' and it is ready for pickup' : ''}.
+                        {order.readyAt ? ' — it is ready for pickup' : ''}.
                         Request a rider to bring it to you.
                       </p>
+                      {!order.readyAt && order.businessAcceptedAt && (
+                        <p className="meta-item meta-item--pending">
+                          <IconClock size={14} /> Preparation time left:{' '}
+                          {prepMinutesLeft(order)} minute(s).
+                        </p>
+                      )}
                       <button
                         type="button"
                         className="btn btn--primary"
@@ -304,6 +398,82 @@ export function CustomerOrdersSection({
                       </button>
                     </div>
                   )}
+
+                {order.status === 'rider_requested' && (
+                  <div className="confirm-box">
+                    <span className="label">Waiting for rider quotes</span>
+                    <p>
+                      Riders have seen your request and will quote a delivery
+                      price. You choose which quote to accept.
+                    </p>
+                    {order.kind === 'shop' &&
+                      !order.readyAt &&
+                      order.businessAcceptedAt && (
+                        <p className="meta-item meta-item--pending">
+                          <IconClock size={14} /> Preparation time left:{' '}
+                          {prepMinutesLeft(order)} minute(s).
+                        </p>
+                      )}
+                  </div>
+                )}
+
+                {order.status === 'rider_quoted' && (
+                  <div className="confirm-box confirm-box--quote">
+                    <span className="label">New quote from a rider</span>
+                    {quoteRiders[order.id] && (
+                      <div className="rider-identity">
+                        <strong>
+                          <IconTruck size={14} />{' '}
+                          {quoteRiders[order.id]!.fullName ?? 'Rider'}
+                        </strong>
+                        <span>
+                          {quoteRiders[order.id]!.vehicleType ?? 'Vehicle not set'}
+                          {quoteRiders[order.id]!.plateNumber
+                            ? ` · ${quoteRiders[order.id]!.plateNumber}`
+                            : ''}
+                        </span>
+                        {quoteRiders[order.id]!.phone && (
+                          <a
+                            className="rider-identity__phone"
+                            href={`tel:${quoteRiders[order.id]!.phone}`}
+                          >
+                            <IconPhone size={14} />{' '}
+                            {quoteRiders[order.id]!.phone}
+                          </a>
+                        )}
+                      </div>
+                    )}
+                    <p className="quote-fee">
+                      Delivery fee:{' '}
+                      <strong>{formatNgn(order.quotedFeeNaira ?? 0)}</strong>
+                    </p>
+                    <p className="meta-item meta-item--pending">
+                      <IconClock size={14} /> This quote is held for you —{' '}
+                      {quoteMinutesLeft(order)} of {QUOTE_HOLD_MINUTES} minute(s)
+                      left.
+                    </p>
+                    <div className="form-actions">
+                      <button
+                        type="button"
+                        className="btn btn--primary"
+                        disabled={quoteBusyId === order.id}
+                        onClick={() => handleAcceptQuote(order)}
+                      >
+                        <IconCheckCircle size={15} />
+                        Accept
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn--ghost"
+                        disabled={quoteBusyId === order.id}
+                        onClick={() => handleDeclineQuote(order)}
+                      >
+                        <IconXCircle size={15} />
+                        Decline
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 {order.status === 'rider_requested' &&
                   noRiderOptions.has(order.id) && (
